@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — CCS Sit-in Monitoring System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #e9ecef; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Navbar */
+    .reg-nav { background: linear-gradient(to right, #2c4a8a, #3b6abf); height: 48px; display: flex; align-items: center; padding: 0 40px; justify-content: space-between; flex-shrink: 0; width: 100%; }
+    .reg-nav-brand { color: white; font-size: 0.88rem; font-weight: 600; }
+    .reg-nav-links { display: flex; align-items: center; gap: 2px; }
+    .reg-nav-link { color: rgba(255,255,255,0.9); font-size: 0.85rem; padding: 6px 12px; border-radius: 3px; text-decoration: none; }
+    .reg-nav-link:hover { background: rgba(255,255,255,0.15); }
+    .reg-nav-link.active { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); }
+
+    /* Page body */
+    .reg-body { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 16px; margin-top: 8px; }
+
+    /* Card */
+    .reg-card { background: white; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.12); width: 490px; padding: 20px 24px 18px; position: relative; }
+
+    /* Back button */
+    .reg-back { display: inline-block; padding: 4px 12px; background: #dc3545; color: white; font-size: 0.78rem; font-weight: 600; border-radius: 4px; text-decoration: none; margin-bottom: 6px; }
+    .reg-back:hover { background: #c82333; }
+
+    /* Title */
+    .reg-title { text-align: center; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
+
+    /* Form + illustration */
+    .reg-content { display: flex; gap: 12px; align-items: flex-start; }
+    .reg-form { flex: 1; min-width: 0; }
+    .reg-illus { width: 165px; flex-shrink: 0; padding-top: 120px; }
+    .reg-illus img { width: 165px; object-fit: contain; }
+
+    /* Fields */
+    .reg-group { margin-bottom: 12px; }
+    .reg-input, .reg-select {
+      display: block; width: 100%; padding: 5px 8px;
+      border: 1px solid #ced4da; border-radius: 3px;
+      font-size: 0.82rem; font-family: 'Inter', sans-serif;
+      color: #495057; background: white; outline: none;
+    }
+    .reg-input:focus, .reg-select:focus { border-color: #80bdff; box-shadow: 0 0 0 2px rgba(0,123,255,0.15); }
+    .reg-label { display: block; font-size: 0.75rem; color: #555; margin-top: 2px; }
+    .reg-pw-wrap { position: relative; }
+    .reg-pw-btn { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #adb5bd; cursor: pointer; display: flex; align-items: center; }
+    .reg-pw-btn:hover { color: #495057; }
+
+    /* Submit */
+    .reg-submit { margin-top: 10px; padding: 7px 20px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 0.85rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+    .reg-submit:hover { background: #0069d9; }
+
+    /* Flash */
+    .flash-container { position: fixed; top: 48px; right: 12px; z-index: 999; display: flex; flex-direction: column; gap: 6px; width: 300px; }
+    .flash { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: 4px; font-size: 0.82rem; }
+    .flash-close { margin-left: auto; background: none; border: none; cursor: pointer; opacity: 0.5; font-size: 0.9rem; }
+    .flash-close:hover { opacity: 1; }
+    .flash-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .flash-error   { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .flash-info    { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="reg-nav">
+    <span class="reg-nav-brand">College of Computer Studies Sit-in Monitoring System</span>
+    <div class="reg-nav-links">
+      <a href="#" class="reg-nav-link">Home</a>
+      <a href="#" class="reg-nav-link">Community ▾</a>
+      <a href="#" class="reg-nav-link">About</a>
+      <a href="{{ url_for('login') }}"    class="reg-nav-link">Login</a>
+      <a href="{{ url_for('register') }}" class="reg-nav-link active">Register</a>
+    </div>
+  </nav>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">
+            <span>{{ message }}</span>
+            <button class="flash-close" onclick="this.parentElement.remove()">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page body -->
+  <div class="reg-body">
+    <div class="reg-card">
+
+      <a href="{{ url_for('login') }}" class="reg-back">Back</a>
+      <div class="reg-title">Sign up</div>
+
+      <div class="reg-content">
+
+        <!-- Form -->
+        <form action="{{ url_for('register') }}" method="POST" class="reg-form">
+
+          <div class="reg-group">
+            <input type="text" name="idno" class="reg-input" required/>
+          
+            <label class="reg-label">ID Number</label>
+          </div>
+          <div class="reg-group">
+            <input type="text" name="lastname" class="reg-input" required/>
+          
+            <label class="reg-label">Last Name</label>
+          </div>
+          <div class="reg-group">
+            <input type="text" name="firstname" class="reg-input" required/>
+          
+            <label class="reg-label">First Name</label>
+          </div>
+          <div class="reg-group">
+            <input type="text" name="middlename" class="reg-input"/>
+          
+            <label class="reg-label">Middle Name</label>
+          </div>
+          <div class="reg-group">
+            <select name="level" class="reg-select" required>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          
+            <label class="reg-label">Course Level</label>
+          </div>
+          <div class="reg-group">
+            <div class="reg-pw-wrap">
+              <input type="password" id="pw1" name="password" class="reg-input" style="padding-right:28px;" required/>
+              <button type="button" class="reg-pw-btn" onclick="togglePw('pw1',this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+            <label class="reg-label">Password</label>
+          </div>
+          <div class="reg-group">
+            <div class="reg-pw-wrap">
+              <input type="password" id="pw2" name="confirm_password" class="reg-input" style="padding-right:28px;" required/>
+              <button type="button" class="reg-pw-btn" onclick="togglePw('pw2',this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+            <label class="reg-label">Repeat your password</label>
+          </div>
+          <div class="reg-group">
+            <input type="email" name="email" class="reg-input" required/>
+          
+            <label class="reg-label">Email</label>
+          </div>
+          <div class="reg-group">
+            <select name="course" class="reg-select" required>
+              <option value="BSIT">BSIT</option>
+              <option value="BSCS">BSCS</option>
+              <option value="BSIS">BSIS</option>
+              <option value="ACT">ACT</option>
+            </select>
+          
+            <label class="reg-label">Course</label>
+          </div>
+          <div class="reg-group">
+            <input type="text" name="address" class="reg-input"/>
+          
+            <label class="reg-label">Address</label>
+          </div>
+
+          <button type="submit" class="reg-submit">Register</button>
+
+        </form>
+
+        <!-- Illustration -->
+        <div class="reg-illus">
+          <img src="{{ url_for('static', filename='images/signup.png') }}" alt="Sign up"/>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePw(id, btn) {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+    // Auto-dismiss flash
+    setTimeout(() => {
+      document.querySelectorAll('.flash').forEach(el => {
+        el.style.transition = 'opacity 0.4s';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 400);
+      });
+    }, 5000);
+  </script>
+</body>
+</html>
