@@ -31,11 +31,17 @@
     /* Title */
     .reg-title { text-align: center; font-size: 1.4rem; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; }
 
+<<<<<<< HEAD
     /* Form + illustration */
     .reg-content { display: flex; gap: 12px; align-items: flex-start; }
     .reg-form { flex: 1; min-width: 0; }
     .reg-illus { width: 165px; flex-shrink: 0; padding-top: 120px; }
     .reg-illus img { width: 165px; object-fit: contain; }
+=======
+    /* Form */
+    .reg-content { display: flex; gap: 12px; align-items: flex-start; justify-content: center; }
+    .reg-form { flex: 1; min-width: 0; }
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
 
     /* Fields */
     .reg-group { margin-bottom: 12px; }
@@ -101,12 +107,16 @@
       <div class="reg-title">Sign up</div>
 
       <div class="reg-content">
+<<<<<<< HEAD
 
         <!-- Form -->
+=======
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
         <form action="{{ url_for('register') }}" method="POST" class="reg-form">
 
           <div class="reg-group">
             <input type="text" name="idno" class="reg-input" required/>
+<<<<<<< HEAD
           
             <label class="reg-label">ID Number</label>
           </div>
@@ -126,15 +136,50 @@
             <label class="reg-label">Middle Name</label>
           </div>
           <div class="reg-group">
+=======
+            <label class="reg-label">ID Number</label>
+          </div>
+
+          <div class="reg-group">
+            <input type="text" name="lastname" class="reg-input" required/>
+            <label class="reg-label">Last Name</label>
+          </div>
+
+          <div class="reg-group">
+            <input type="text" name="firstname" class="reg-input" required/>
+            <label class="reg-label">First Name</label>
+          </div>
+
+          <div class="reg-group">
+            <select name="course" class="reg-select" required>
+              <option value="">-- Select Course --</option>
+              <option value="BSIT">BSIT</option>
+              <option value="BSCS">BSCS</option>
+              <option value="BSED">BSED</option>
+              <option value="BSCJ">BSCJ</option>
+              <option value="BSN">BSN</option>
+              <option value="BSHM">BSHM</option>
+            </select>
+            <label class="reg-label">Course</label>
+          </div>
+
+          <div class="reg-group"> 
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
             <select name="level" class="reg-select" required>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
               <option value="4">4</option>
             </select>
+<<<<<<< HEAD
           
             <label class="reg-label">Course Level</label>
           </div>
+=======
+            <label class="reg-label">Course Level</label>
+          </div>
+
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
           <div class="reg-group">
             <div class="reg-pw-wrap">
               <input type="password" id="pw1" name="password" class="reg-input" style="padding-right:28px;" required/>
@@ -144,6 +189,10 @@
             </div>
             <label class="reg-label">Password</label>
           </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
           <div class="reg-group">
             <div class="reg-pw-wrap">
               <input type="password" id="pw2" name="confirm_password" class="reg-input" style="padding-right:28px;" required/>
@@ -153,6 +202,7 @@
             </div>
             <label class="reg-label">Repeat your password</label>
           </div>
+<<<<<<< HEAD
           <div class="reg-group">
             <input type="email" name="email" class="reg-input" required/>
           
@@ -171,18 +221,31 @@
           <div class="reg-group">
             <input type="text" name="address" class="reg-input"/>
           
+=======
+
+          <div class="reg-group">
+            <input type="email" name="email" class="reg-input" required/>
+            <label class="reg-label">Email</label>
+          </div>
+
+          <div class="reg-group">
+            <input type="text" name="address" class="reg-input"/>
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
             <label class="reg-label">Address</label>
           </div>
 
           <button type="submit" class="reg-submit">Register</button>
 
         </form>
+<<<<<<< HEAD
 
         <!-- Illustration -->
         <div class="reg-illus">
           <img src="{{ url_for('static', filename='images/signup.png') }}" alt="Sign up"/>
         </div>
 
+=======
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
       </div>
     </div>
   </div>
@@ -192,7 +255,10 @@
       const input = document.getElementById(id);
       input.type = input.type === 'password' ? 'text' : 'password';
     }
+<<<<<<< HEAD
     // Auto-dismiss flash
+=======
+>>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
     setTimeout(() => {
       document.querySelectorAll('.flash').forEach(el => {
         el.style.transition = 'opacity 0.4s';
