@@ -2,10 +2,6 @@ import sqlite3
 import os
 from werkzeug.security import generate_password_hash
 
-# ─────────────────────────────────────────────
-#  CONNECTION
-# ─────────────────────────────────────────────
-
 def connect():
     base_path = os.path.dirname(os.path.abspath(__file__))
     db_path   = os.path.join(base_path, "sysarch.db")
@@ -13,10 +9,6 @@ def connect():
     conn.row_factory = sqlite3.Row
     return conn
 
-
-# ─────────────────────────────────────────────
-#  INIT TABLES
-# ─────────────────────────────────────────────
 
 def init_database():
     conn = connect()
@@ -35,6 +27,7 @@ def init_database():
             address        TEXT,
             password       VARCHAR(255) NOT NULL,
             image_filename VARCHAR(255),
+            remaining_session INTEGER DEFAULT 30,
             created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -49,23 +42,85 @@ def init_database():
         )
     ''')
 
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS sit_in (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            idno       VARCHAR(20) NOT NULL,
+            purpose    VARCHAR(100) NOT NULL,
+            lab        VARCHAR(20)  NOT NULL,
+            login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status     VARCHAR(20) DEFAULT 'active',
+            FOREIGN KEY (idno) REFERENCES students(idno)
+        )
+    ''')
 
-    # ── Default admin account (only inserted once) ──
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS sit_in_records (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            idno        VARCHAR(20) NOT NULL,
+            purpose     VARCHAR(100) NOT NULL,
+            lab         VARCHAR(20)  NOT NULL,
+            login_time  TIMESTAMP NOT NULL,
+            logout_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (idno) REFERENCES students(idno)
+        )
+    ''')
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS announcements (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            content    TEXT NOT NULL,
+            posted_by  VARCHAR(100) DEFAULT 'CCS Admin',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS feedback (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            idno       VARCHAR(20) NOT NULL,
+            message    TEXT NOT NULL,
+            rating     INTEGER DEFAULT 5,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (idno) REFERENCES students(idno)
+        )
+    ''')
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS reservations (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            idno         VARCHAR(20)  NOT NULL,
+            lab          VARCHAR(20)  NOT NULL,
+            date         DATE         NOT NULL,
+            time_slot    VARCHAR(50)  NOT NULL,
+            purpose      VARCHAR(100) NOT NULL,
+            status       VARCHAR(20)  DEFAULT 'pending',
+            created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (idno) REFERENCES students(idno)
+        )
+    ''')
+
+    # Add remaining_session column if missing (migration)
+    try:
+        cur.execute("ALTER TABLE students ADD COLUMN remaining_session INTEGER DEFAULT 30")
+        conn.commit()
+    except:
+        pass
+
+    # Default admin
     cur.execute("SELECT COUNT(*) FROM users WHERE email = ?", ("admin@ccs.edu",))
     if cur.fetchone()[0] == 0:
         cur.execute(
             "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
             ("Administrator", "admin@ccs.edu", generate_password_hash("admin123"))
         )
-        print("[INIT] Default admin account created → email: admin@ccs.edu | password: admin123")
+        print("[INIT] Default admin → email: admin@ccs.edu | password: admin123")
 
     conn.commit()
     conn.close()
 
 
-# ─────────────────────────────────────────────
-#  GENERIC CRUD
-# ─────────────────────────────────────────────
+# ── Generic CRUD ──────────────────────────────────────────
 
 def getall(table):
     conn = connect()
@@ -172,17 +227,229 @@ def recordexists_exclude(table, field, value, exclude_field, exclude_value):
         conn.close()
 
 
-# ─────────────────────────────────────────────
-#  STUDENT FUNCTIONS
-# ─────────────────────────────────────────────
+# ── Student functions ─────────────────────────────────────
 
 def get_student_by_idno(idno):
     return getone('students', idno=idno)
 
 
-# ─────────────────────────────────────────────
-#  USER (ADMIN) FUNCTIONS
-# ─────────────────────────────────────────────
+def get_all_students():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("SELECT * FROM students ORDER BY idno ASC")
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def search_students(query):
+    conn = connect()
+    cur  = conn.cursor()
+    q = f"%{query}%"
+    cur.execute("""
+        SELECT * FROM students
+        WHERE idno LIKE ? OR firstname LIKE ? OR lastname LIKE ?
+        ORDER BY idno ASC
+    """, (q, q, q))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def reset_all_sessions():
+    conn = connect()
+    cur  = conn.cursor()
+    try:
+        cur.execute("UPDATE students SET remaining_session = 30")
+        conn.commit()
+        return True
+    except:
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+# ── Sit-in functions ──────────────────────────────────────
+
+def get_active_sitin():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT s.*, st.firstname, st.lastname, st.course, st.level
+        FROM sit_in s
+        JOIN students st ON s.idno = st.idno
+        WHERE s.status = 'active'
+        ORDER BY s.login_time DESC
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def is_student_sitting_in(idno):
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM sit_in WHERE idno = ? AND status = 'active'", (idno,))
+    result = cur.fetchone()[0] > 0
+    conn.close()
+    return result
+
+
+def sitin_student(idno, purpose, lab):
+    conn = connect()
+    cur  = conn.cursor()
+    try:
+        # Insert active sit-in
+        cur.execute(
+            "INSERT INTO sit_in (idno, purpose, lab) VALUES (?, ?, ?)",
+            (idno, purpose, lab)
+        )
+        # Decrement session
+        cur.execute(
+            "UPDATE students SET remaining_session = remaining_session - 1 WHERE idno = ? AND remaining_session > 0",
+            (idno,)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        print("sitin_student error:", e)
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+def logout_student(sit_id):
+    conn = connect()
+    cur  = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM sit_in WHERE id = ? AND status = 'active'", (sit_id,))
+        row = cur.fetchone()
+        if not row:
+            return False
+        cur.execute("""
+            INSERT INTO sit_in_records (idno, purpose, lab, login_time)
+            VALUES (?, ?, ?, ?)
+        """, (row['idno'], row['purpose'], row['lab'], row['login_time']))
+        cur.execute("DELETE FROM sit_in WHERE id = ?", (sit_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        print("logout_student error:", e)
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+def get_sitin_records():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT r.*, s.firstname, s.lastname, s.course, s.level
+        FROM sit_in_records r
+        JOIN students s ON r.idno = s.idno
+        ORDER BY r.logout_time DESC
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_sitin_stats():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM students")
+    total_students = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM sit_in WHERE status = 'active'")
+    currently_in = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM sit_in_records")
+    total_sitins = cur.fetchone()[0]
+    cur.execute("""
+        SELECT purpose, COUNT(*) as cnt
+        FROM sit_in_records
+        GROUP BY purpose
+    """)
+    purpose_counts = cur.fetchall()
+    conn.close()
+    return {
+        'total_students': total_students,
+        'currently_in': currently_in,
+        'total_sitins': total_sitins,
+        'purpose_counts': [dict(r) for r in purpose_counts]
+    }
+
+
+# ── Announcement functions ────────────────────────────────
+
+def get_all_announcements():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("SELECT * FROM announcements ORDER BY created_at DESC")
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def add_announcement(content, posted_by='CCS Admin'):
+    return addrecord('announcements', content=content, posted_by=posted_by)
+
+
+def delete_announcement(ann_id):
+    return deleterecord('announcements', id=ann_id)
+
+
+# ── Feedback functions ────────────────────────────────────
+
+def get_all_feedback():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT f.*, s.firstname, s.lastname
+        FROM feedback f
+        JOIN students s ON f.idno = s.idno
+        ORDER BY f.created_at DESC
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def add_feedback(idno, message, rating=5):
+    return addrecord('feedback', idno=idno, message=message, rating=rating)
+
+
+# ── Reservation functions ─────────────────────────────────
+
+def get_all_reservations():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT r.*, s.firstname, s.lastname, s.course
+        FROM reservations r
+        JOIN students s ON r.idno = s.idno
+        ORDER BY r.date ASC, r.time_slot ASC
+    """)
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_student_reservations(idno):
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("SELECT * FROM reservations WHERE idno = ? ORDER BY date DESC", (idno,))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def update_reservation_status(res_id, status):
+    return updaterecord('reservations', 'id', res_id, status=status)
+
+
+# ── User (admin) functions ────────────────────────────────
 
 def get_user_by_email(email):
     return getone('users', email=email)

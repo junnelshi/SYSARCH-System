@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feedback Reports — CCS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+{% from 'macros.html' import admin_nav %}
+{{ admin_nav('feedback') }}
+
+<div class="admin-page">
+  <div class="page-heading">Feedback Reports</div>
+
+  <div class="card">
+    <div class="card-header">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+      Student Feedback
+    </div>
+    <div class="table-toolbar">
+      <div class="entries-select">Show <select><option>10</option><option>25</option><option>50</option></select> entries</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#4a5568;">
+        Search: <input type="text" id="tableSearch" oninput="searchTable(this.value)" class="table-search-input"/>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="feedbackTable">
+        <thead>
+          <tr><th>#</th><th>Student ID</th><th>Name</th><th>Rating</th><th>Message</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for f in feedbacks %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td><strong>{{ f.idno }}</strong></td>
+            <td>{{ f.firstname }} {{ f.lastname }}</td>
+            <td>
+              <span class="rating-stars">
+                {% for i in range(f.rating) %}★{% endfor %}{% for i in range(5 - f.rating) %}<span style="color:#e2e8f0;">★</span>{% endfor %}
+              </span>
+              <span style="font-size:0.75rem;color:#718096;margin-left:4px;">({{ f.rating }}/5)</span>
+            </td>
+            <td style="max-width:300px;">{{ f.message }}</td>
+            <td style="color:#718096;font-size:0.78rem;">{{ f.created_at[:10] }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="no-data-cell">No feedback submitted yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+function searchTable(q) {
+  document.querySelectorAll('#feedbackTable tbody tr').forEach(r=>{
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

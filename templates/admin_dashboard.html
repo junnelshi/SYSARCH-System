@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — CCS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="admin-navbar">
+  <span class="navbar-brand">College of Computer Studies Admin</span>
+  <div class="navbar-menu">
+    <a href="{{ url_for('dashboard') }}"           class="nav-link active">Home</a>
+    <a href="#" onclick="openSearch();return false" class="nav-link">Search</a>
+    <a href="{{ url_for('students_list') }}"        class="nav-link">Students</a>
+    <a href="#" onclick="openSitin();return false"  class="nav-link">Sit-in</a>
+    <a href="{{ url_for('current_sitin') }}"        class="nav-link">View Sit-in Records</a>
+    <a href="{{ url_for('sitin_records') }}"        class="nav-link">Sit-in Records</a>
+    <a href="{{ url_for('sitin_reports') }}"        class="nav-link">Sit-in Reports</a>
+    <a href="{{ url_for('feedback_reports') }}"     class="nav-link">Feedback Reports</a>
+    <a href="{{ url_for('admin_reservations') }}"   class="nav-link">Reservation</a>
+    <a href="{{ url_for('logout') }}"               class="nav-logout">Log out</a>
+  </div>
+</nav>
+
+<div class="admin-page">
+
+  <!-- Flash -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Summary boxes -->
+  <div class="summary-boxes">
+    <div class="summary-box blue">
+      <div class="summary-icon blue">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#2a5298" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+      <div>
+        <div class="summary-num">{{ stats.total_students }}</div>
+        <div class="summary-lbl">Students Registered</div>
+      </div>
+    </div>
+    <div class="summary-box green">
+      <div class="summary-icon green">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#38a169" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      </div>
+      <div>
+        <div class="summary-num">{{ stats.currently_in }}</div>
+        <div class="summary-lbl">Currently Sit-in</div>
+      </div>
+    </div>
+    <div class="summary-box orange">
+      <div class="summary-icon orange">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#d69e2e" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <div>
+        <div class="summary-num">{{ stats.total_sitins }}</div>
+        <div class="summary-lbl">Total Sit-in</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="dashboard-grid">
+
+    <!-- Statistics card -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Statistics
+      </div>
+      <div class="card-body">
+        {% if stats.purpose_counts %}
+          <div class="chart-wrap">
+            <canvas id="purposeChart"></canvas>
+          </div>
+          <div style="margin-top:12px;">
+            {% for p in stats.purpose_counts %}
+              <div class="stat-item">
+                <span class="stat-label">{{ p.purpose }}</span>
+                <span class="stat-value">{{ p.cnt }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="no-data">No sit-in data yet. Log a student in to see statistics.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Announcement card -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+        Announcement
+      </div>
+      <div class="card-body">
+        <form action="{{ url_for('add_announcement_route') }}" method="POST">
+          <textarea name="content" class="ann-textarea" placeholder="Write a new announcement…" rows="3" required></textarea>
+          <button type="submit" class="btn btn-success" style="width:100%;">Post Announcement</button>
+        </form>
+
+        <div class="ann-list" style="margin-top:16px;">
+          <div class="ann-list-title">Posted Announcements</div>
+          {% for ann in announcements %}
+            <div class="ann-item">
+              <div class="ann-dot"></div>
+              <div class="ann-content">
+                <div class="ann-meta">CCS Admin | {{ ann.created_at[:10] }}</div>
+                <div class="ann-body">{{ ann.content }}</div>
+              </div>
+              <a href="{{ url_for('delete_announcement_route', ann_id=ann.id) }}"
+                 class="ann-delete"
+                 onclick="return confirm('Delete this announcement?')">Delete</a>
+            </div>
+          {% else %}
+            <p class="no-data">No announcements posted yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Search Modal ── -->
+<div id="searchModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <span>Search Student</span>
+      <button onclick="closeSearch()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Search by ID or Name</label>
+        <input type="text" id="searchInput" class="modal-input" placeholder="Type to search…" oninput="doSearch(this.value)" autocomplete="off"/>
+      </div>
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sit-in Modal ── -->
+<div id="sitinModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <span>Sit In Form</span>
+      <button onclick="closeSitin()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form action="{{ url_for('admin_sitin') }}" method="POST">
+        <div class="form-group">
+          <label>ID Number</label>
+          <input type="text" name="idno" id="sitinIdno" class="modal-input" required/>
+        </div>
+        <div class="form-group">
+          <label>Student Name</label>
+          <input type="text" id="sitinName" class="modal-input" readonly/>
+        </div>
+        <div class="form-group">
+          <label>Purpose</label>
+          <select name="purpose" class="modal-input" required>
+            <option value="">-- Select Purpose --</option>
+            <option>C Programming</option><option>Java</option><option>C#</option>
+            <option>ASP.Net</option><option>PHP</option><option>Database</option>
+            <option>Research</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lab</label>
+          <select name="lab" class="modal-input" required>
+            <option value="">-- Select Lab --</option>
+            <option>524</option><option>526</option><option>528</option><option>530</option><option>542</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Remaining Session</label>
+          <input type="text" id="sitinSession" class="modal-input" readonly/>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeSitin()">Close</button>
+          <button type="submit" class="btn btn-primary">Sit In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Chart
+const purposeData = {{ stats.purpose_counts | tojson }};
+if (purposeData.length > 0) {
+  new Chart(document.getElementById('purposeChart').getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: purposeData.map(p => p.purpose),
+      datasets: [{ data: purposeData.map(p => p.cnt),
+        backgroundColor: ['#2a5298','#e53e3e','#38a169','#d69e2e','#805ad5','#e8a020','#3182ce','#dd6b20'],
+        borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom', labels: { padding: 16, font: { size: 11 } } } } }
+  });
+}
+
+// Search
+function openSearch() { document.getElementById('searchModal').style.display='flex'; setTimeout(()=>document.getElementById('searchInput').focus(),100); }
+function closeSearch() { document.getElementById('searchModal').style.display='none'; document.getElementById('searchResults').innerHTML=''; document.getElementById('searchInput').value=''; }
+
+function doSearch(q) {
+  const el = document.getElementById('searchResults');
+  if (!q.trim()) { el.innerHTML=''; return; }
+  fetch('/admin/search_student?q='+encodeURIComponent(q))
+    .then(r=>r.json()).then(students=>{
+      if (!students.length) { el.innerHTML='<p class="no-data">No students found.</p>'; return; }
+      el.innerHTML = students.map(s=>`
+        <div class="result-row" onclick="selectStudent('${s.idno}','${s.name}',${s.remaining_session})">
+          <div>
+            <div class="result-name">${s.name}</div>
+            <div class="result-meta">${s.idno} · ${s.course} Year ${s.level}</div>
+          </div>
+          <span class="session-badge">${s.remaining_session} sessions</span>
+          ${s.already_in ? '<span class="in-badge">IN</span>' : ''}
+        </div>`).join('');
+    });
+}
+
+function selectStudent(idno, name, sessions) {
+  closeSearch();
+  document.getElementById('sitinIdno').value    = idno;
+  document.getElementById('sitinName').value    = name;
+  document.getElementById('sitinSession').value = sessions;
+  openSitin();
+}
+
+// Sit-in modal
+function openSitin() { document.getElementById('sitinModal').style.display='flex'; }
+function closeSitin() { document.getElementById('sitinModal').style.display='none'; }
+
+// Close modals on backdrop click
+['searchModal','sitinModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id) document.getElementById(id).style.display='none'; });
+});
+
+// Auto-dismiss flash
+setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); }, 5000);
+</script>
+</body>
+</html>

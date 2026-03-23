@@ -1,0 +1,17 @@
+{% macro admin_nav(active='') %}
+<nav class="admin-navbar">
+  <span class="navbar-brand">College of Computer Studies Admin</span>
+  <div class="navbar-menu">
+    <a href="{{ url_for('dashboard') }}"            class="nav-link {{ 'active' if active=='home' }}">Home</a>
+    <a href="{{ url_for('dashboard') }}"            class="nav-link {{ 'active' if active=='search' }}">Search</a>
+    <a href="{{ url_for('students_list') }}"         class="nav-link {{ 'active' if active=='students' }}">Students</a>
+    <a href="{{ url_for('dashboard') }}"             class="nav-link {{ 'active' if active=='sitin' }}">Sit-in</a>
+    <a href="{{ url_for('current_sitin') }}"         class="nav-link {{ 'active' if active=='current' }}">View Sit-in Records</a>
+    <a href="{{ url_for('sitin_records') }}"         class="nav-link {{ 'active' if active=='records' }}">Sit-in Records</a>
+    <a href="{{ url_for('sitin_reports') }}"         class="nav-link {{ 'active' if active=='reports' }}">Sit-in Reports</a>
+    <a href="{{ url_for('feedback_reports') }}"      class="nav-link {{ 'active' if active=='feedback' }}">Feedback Reports</a>
+    <a href="{{ url_for('admin_reservations') }}"    class="nav-link {{ 'active' if active=='reservation' }}">Reservation</a>
+    <a href="{{ url_for('logout') }}"                class="nav-logout">Log out</a>
+  </div>
+</nav>
+{% endmacro %}

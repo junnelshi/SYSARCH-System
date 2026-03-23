@@ -4,103 +4,232 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login — CCS Sit-in Monitoring System</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; background: #f0f4f8; }
+
+    /* ── Left side ── */
+    .left-panel {
+      width: 52%; background: linear-gradient(145deg, #0d2247 0%, #1a3560 40%, #2a5298 80%, #3b6fd4 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 40px; position: relative; overflow: hidden;
+    }
+    /* Decorative circles */
+    .left-panel::before {
+      content: ''; position: absolute; width: 420px; height: 420px; border-radius: 50%;
+      border: 60px solid rgba(255,255,255,0.04); top: -120px; left: -120px;
+    }
+    .left-panel::after {
+      content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+      border: 50px solid rgba(255,255,255,0.05); bottom: -80px; right: -80px;
+    }
+
+    .logos-row {
+      display: flex; align-items: center; justify-content: center; gap: 36px; margin-bottom: 52px; z-index: 1;
+    }
+    .logo-img {
+      height: 130px; width: auto;
+      filter: drop-shadow(0 6px 20px rgba(0,0,0,0.35));
+      transition: transform 0.3s ease;
+    }
+    .logo-img:hover { transform: scale(1.05); }
+    .logo-divider {
+      width: 1.5px; height: 100px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.4), transparent);
+    }
+
+    .left-text { text-align: center; z-index: 1; }
+    .left-badge {
+      display: inline-block; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 7px 20px; border-radius: 20px; margin-bottom: 22px;
+      backdrop-filter: blur(6px);
+    }
+    .left-title {
+      font-size: 3rem; font-weight: 800; color: #fff;
+      line-height: 1.2; margin-bottom: 18px; letter-spacing: -0.02em;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+    .left-subtitle {
+      font-size: 1.2rem; color: rgba(255,255,255,0.6);
+      line-height: 1.7; max-width: 380px; margin: 0 auto;
+    }
+    .left-divider {
+      width: 60px; height: 4px; background: linear-gradient(90deg, #5b8dee, rgba(255,255,255,0.2));
+      border-radius: 2px; margin: 24px auto 0; z-index: 1;
+    }
+
+    /* ── Right side ── */
+    .right-panel {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px 32px;
+    }
+
+    .login-box { width: 100%; max-width: 400px; }
+
+    .login-header { margin-bottom: 28px; }
+    .login-title { font-size: 1.6rem; font-weight: 800; color: #1a202c; margin-bottom: 4px; }
+    .login-sub { font-size: 0.85rem; color: #718096; }
+    .login-sub span { color: #2a5298; font-weight: 600; }
+
+    /* Flash */
+    .flash-stack { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .flash {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 500;
+    }
+    .flash button { background: none; border: none; cursor: pointer; opacity: 0.5; font-size: 0.85rem; }
+    .flash-success { background: #c6f6d5; border-left: 4px solid #38a169; color: #22543d; }
+    .flash-error   { background: #fed7d7; border-left: 4px solid #e53e3e; color: #742a2a; }
+    .flash-info    { background: #bee3f8; border-left: 4px solid #3182ce; color: #1a365d; }
+
+    /* Form */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 0.76rem; font-weight: 700; color: #4a5568; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .input-wrap { position: relative; }
+    .form-input {
+      width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-size: 0.88rem; font-family: 'Inter', sans-serif; color: #1a202c;
+      outline: none; transition: all 0.15s; background: #fff;
+    }
+    .form-input:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,0.1); }
+    .form-input::placeholder { color: #a0aec0; }
+    .pw-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #a0aec0; display: flex;
+    }
+    .pw-toggle:hover { color: #4a5568; }
+    .pw-toggle svg { width: 18px; height: 18px; }
+
+    .form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+    .remember-label { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: #4a5568; cursor: pointer; }
+    .remember-label input { accent-color: #2a5298; width: 14px; height: 14px; }
+    .forgot-link { font-size: 0.82rem; color: #2a5298; font-weight: 600; text-decoration: none; }
+    .forgot-link:hover { text-decoration: underline; }
+
+    .btn-login {
+      width: 100%; padding: 12px; background: linear-gradient(90deg, #1a3560, #2a5298);
+      color: #fff; border: none; border-radius: 10px; font-size: 0.92rem; font-weight: 700;
+      font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.02em; box-shadow: 0 4px 14px rgba(42,82,152,0.35);
+    }
+    .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(42,82,152,0.45); }
+    .btn-login:active { transform: none; }
+
+    .register-row { text-align: center; margin-top: 20px; font-size: 0.84rem; color: #718096; }
+    .register-row a { color: #2a5298; font-weight: 700; text-decoration: none; }
+    .register-row a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .left-panel { width: 100%; padding: 32px 24px; min-height: 220px; }
+      .right-panel { padding: 32px 20px; }
+    }
+  </style>
 </head>
 <body>
-<div class="login-page">
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <span class="navbar-brand">College of Computer Studies Sit-in Monitoring System</span>
-    <div class="navbar-links">
-      <a href="#" class="nav-link">Home</a>
-      <div class="dropdown">
-        <button class="nav-link">Community ▾</button>
-        <div class="dropdown-menu">
-          <a href="#" class="dropdown-item">Forums</a>
-          <a href="#" class="dropdown-item">Announcements</a>
+  <!-- ── Left Panel ── -->
+  <div class="left-panel">
+    <div class="logos-row">
+      <img src="{{ url_for('static', filename='images/uclogo.png') }}" alt="UC Logo" class="logo-img"/>
+      <div class="logo-divider"></div>
+      <img src="{{ url_for('static', filename='images/csslogo.png') }}" alt="CCS Logo" class="logo-img"/>
+    </div>
+
+    <div class="left-text">
+      <div class="left-badge">University of Cebu</div>
+      <div class="left-title">CCS Sit-in Monitoring System</div>
+      <div class="left-subtitle">College of Computer Studies</div>
+    </div>
+    <div class="left-divider"></div>
+  </div>
+
+  <!-- ── Right Panel ── -->
+  <div class="right-panel">
+    <div class="login-box">
+
+      <div class="login-header">
+        <div class="login-title">Welcome back</div>
+        <div class="login-sub">Sign in to your <span>CCS account</span></div>
+      </div>
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">
+                {{ message }}
+                <button onclick="this.parentElement.remove()">✕</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form action="{{ url_for('login') }}" method="POST">
+
+        <div class="form-group">
+          <label class="form-label">ID Number</label>
+          <div class="input-wrap">
+            <input type="text" name="idno" class="form-input" placeholder="Enter your student ID or email" required/>
+          </div>
         </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="pw" name="password" class="form-input" placeholder="Enter your password" style="padding-right:42px;" required/>
+            <button type="button" class="pw-toggle" onclick="togglePw()">
+              <svg id="eye-show" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              <svg id="eye-hide" style="display:none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="remember-label">
+            <input type="checkbox" name="remember"/> Remember me
+          </label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-login">Sign In</button>
+
+      </form>
+
+      <div class="register-row">
+        Don't have an account? <a href="{{ url_for('register') }}">Create one</a>
       </div>
-      <a href="#" class="nav-link">About</a>
-      <a href="{{ url_for('login') }}"    class="nav-link active">Login</a>
-      <a href="{{ url_for('register') }}" class="nav-link">Register</a>
-    </div>
-  </nav>
 
-  <!-- Flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="flash-container">
-        {% for category, message in messages %}
-          <div class="flash flash-{{ category }}">
-            <span>{{ message }}</span>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-
-  <!-- Body: logo left, form right -->
-  <div class="login-body">
-
-    <div class="login-left">
-<<<<<<< HEAD
-      <img src="{{ url_for('static', filename='images/csslogo.png') }}" alt="CCS Logo"/>
-=======
-      <img src="{{ url_for('static', filename='images/csslogo.png') }}" alt="CCS Logo" style="width: 400px; height: auto;"/>
->>>>>>> 62a0c80d0dc809397b0caf6b649891e6a8031885
-    </div>
-
-    <div class="login-right">
-      <div class="login-form-wrap">
-
-        <form action="{{ url_for('login') }}" method="POST">
-
-          <div class="form-group">
-            <div class="input-wrapper">
-              <input type="text" id="idno" name="idno" class="form-input" placeholder="Enter a valid id number" required/>
-            </div>
-            <label class="form-label">ID Number</label>
-          </div>
-
-          <div class="form-group">
-            <div class="input-wrapper">
-              <input type="password" id="password" name="password" class="form-input" placeholder="Enter password" style="padding-right:38px;" required/>
-              <button type="button" class="toggle-pw" onclick="togglePw('password', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-              </button>
-            </div>
-            <label class="form-label">Password</label>
-          </div>
-
-          <div class="remember-row">
-            <label class="remember-label">
-              <input type="checkbox" name="remember"/> Remember me
-            </label>
-            <a href="#" class="forgot-link">Forgot password?</a>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block" data-loader>
-            <span class="btn-text">Login</span>
-            <span class="btn-loader" style="display:none;align-items:center;gap:6px;">
-              <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-              Logging in…
-            </span>
-          </button>
-
-        </form>
-
-        <p class="register-link">
-          Don't have an account? <a href="{{ url_for('register') }}">Register</a>
-        </p>
-
-      </div>
     </div>
   </div>
 
-</div>
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+function togglePw() {
+  const pw = document.getElementById('pw');
+  const show = document.getElementById('eye-show');
+  const hide = document.getElementById('eye-hide');
+  if (pw.type === 'password') {
+    pw.type = 'text';
+    show.style.display = 'none';
+    hide.style.display = 'block';
+  } else {
+    pw.type = 'password';
+    show.style.display = 'block';
+    hide.style.display = 'none';
+  }
+}
+setTimeout(() => {
+  document.querySelectorAll('.flash').forEach(el => {
+    el.style.transition = 'opacity 0.4s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 400);
+  });
+}, 5000);
+</script>
 </body>
 </html>

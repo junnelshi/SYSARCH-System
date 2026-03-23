@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sit-in Records — CCS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+{% from 'macros.html' import admin_nav %}
+{{ admin_nav('records') }}
+
+<div class="admin-page">
+  <div class="page-heading">Sit-in Records</div>
+
+  <div class="card">
+    <div class="card-header">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Historical Sit-in Records
+    </div>
+    <div class="table-toolbar">
+      <div class="entries-select">Show <select><option>10</option><option>25</option><option>50</option></select> entries</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#4a5568;">
+        Search: <input type="text" id="tableSearch" oninput="searchTable(this.value)" class="table-search-input"/>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="recordsTable">
+        <thead>
+          <tr><th>#</th><th>ID Number</th><th>Name</th><th>Course</th><th>Purpose</th><th>Lab</th><th>Login Time</th><th>Logout Time</th></tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td><strong>{{ r.idno }}</strong></td>
+            <td>{{ r.firstname }} {{ r.lastname }}</td>
+            <td>{{ r.course }}</td>
+            <td>{{ r.purpose }}</td>
+            <td>{{ r.lab }}</td>
+            <td style="color:#718096;font-size:0.78rem;">{{ r.login_time }}</td>
+            <td style="color:#718096;font-size:0.78rem;">{{ r.logout_time }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="no-data-cell">No records found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+function searchTable(q) {
+  document.querySelectorAll('#recordsTable tbody tr').forEach(r=>{
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

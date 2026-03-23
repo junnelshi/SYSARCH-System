@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sit-in Reports — CCS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+{% from 'macros.html' import admin_nav %}
+{{ admin_nav('reports') }}
+
+<div class="admin-page">
+  <div class="page-heading">Sit-in Reports</div>
+
+  <!-- Summary boxes -->
+  <div class="summary-boxes">
+    <div class="summary-box blue">
+      <div class="summary-icon blue">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#2a5298" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+      <div><div class="summary-num">{{ stats.total_students }}</div><div class="summary-lbl">Total Students</div></div>
+    </div>
+    <div class="summary-box green">
+      <div class="summary-icon green">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#38a169" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      </div>
+      <div><div class="summary-num">{{ stats.currently_in }}</div><div class="summary-lbl">Currently Sit-in</div></div>
+    </div>
+    <div class="summary-box orange">
+      <div class="summary-icon orange">
+        <svg fill="none" viewBox="0 0 24 24" stroke="#d69e2e" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <div><div class="summary-num">{{ stats.total_sitins }}</div><div class="summary-lbl">Total Records</div></div>
+    </div>
+  </div>
+
+  <div class="reports-grid">
+    <div class="card">
+      <div class="card-header">Sit-ins by Purpose — Pie Chart</div>
+      <div class="card-body">
+        {% if stats.purpose_counts %}
+          <div style="max-width:320px; margin:0 auto;"><canvas id="pieChart"></canvas></div>
+        {% else %}
+          <p class="no-data">No data available yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Sit-ins by Purpose — Bar Chart</div>
+      <div class="card-body">
+        {% if stats.purpose_counts %}
+          <canvas id="barChart"></canvas>
+        {% else %}
+          <p class="no-data">No data available yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card full-width">
+      <div class="card-header">Purpose Breakdown</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Purpose</th><th>Count</th><th>Share</th></tr></thead>
+          <tbody>
+            {% set total = stats.total_sitins if stats.total_sitins > 0 else 1 %}
+            {% for p in stats.purpose_counts %}
+            <tr>
+              <td>{{ p.purpose }}</td>
+              <td><strong>{{ p.cnt }}</strong></td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="background:#e2e8f0;border-radius:4px;height:8px;width:120px;overflow:hidden;">
+                    <div style="background:#2a5298;height:8px;width:{{ (p.cnt / total * 100)|int }}%;border-radius:4px;"></div>
+                  </div>
+                  <span style="font-size:0.78rem;color:#718096;">{{ (p.cnt / total * 100)|round(1) }}%</span>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="no-data-cell">No data</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const purposes = {{ stats.purpose_counts | tojson }};
+const labels = purposes.map(p=>p.purpose);
+const counts = purposes.map(p=>p.cnt);
+const colors = ['#2a5298','#e53e3e','#38a169','#d69e2e','#805ad5','#e8a020','#3182ce','#dd6b20'];
+
+if (purposes.length > 0) {
+  new Chart(document.getElementById('pieChart').getContext('2d'), {
+    type: 'pie',
+    data: { labels, datasets: [{ data: counts, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 } } } } }
+  });
+  new Chart(document.getElementById('barChart').getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Sit-ins', data: counts, backgroundColor: colors, borderRadius: 6, borderSkipped: false }] },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f0f4f8' } }, x: { grid: { display: false } } }
+    }
+  });
+}
+</script>
+</body>
+</html>
