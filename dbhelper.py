@@ -112,9 +112,9 @@ def init_database():
     if cur.fetchone()[0] == 0:
         cur.execute(
             "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-            ("Administrator", "admin@ccs.edu", generate_password_hash("admin123"))
+            ("Administrator", "admin@ccs.edu", generate_password_hash("admin123!"))
         )
-        print("[INIT] Default admin → email: admin@ccs.edu | password: admin123")
+        print("[INIT] Default admin → email: admin@ccs.edu | password: admin123!")
 
     conn.commit()
     conn.close()

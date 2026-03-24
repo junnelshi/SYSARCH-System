@@ -388,6 +388,61 @@ def update_reservation(res_id, status):
 
 # ── Student: Feedback ─────────────────────────────────────
 
+@app.route('/student/update_profile', methods=['POST'])
+def update_profile():
+    rr = login_required()
+    if rr: return rr
+
+    idno       = session['student_id']
+    firstname  = request.form.get('firstname', '').strip()
+    lastname   = request.form.get('lastname', '').strip()
+    middlename = request.form.get('middlename', '').strip()
+    email      = request.form.get('email', '').strip()
+    address    = request.form.get('address', '').strip()
+    course     = request.form.get('course', '').strip()
+    level      = request.form.get('level', '').strip()
+    new_pw     = request.form.get('new_password', '').strip()
+    confirm_pw = request.form.get('confirm_password', '').strip()
+    remove_photo = request.form.get('remove_photo', '0')
+
+    # Check email uniqueness
+    if recordexists_exclude('students', 'idno', idno, email=email):
+        flash('That email is already used by another account.', 'error')
+        return redirect(url_for('dashboard'))
+
+    # Password change
+    update_fields = dict(
+        firstname=firstname, lastname=lastname, middlename=middlename,
+        email=email, address=address, course=course, level=level
+    )
+
+    if new_pw:
+        if new_pw != confirm_pw:
+            flash('Passwords do not match.', 'error')
+            return redirect(url_for('dashboard'))
+        update_fields['password'] = generate_password_hash(new_pw)
+
+    # Handle photo
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    file = request.files.get('profile_image')
+    if remove_photo == '1':
+        update_fields['profile_image'] = None
+    elif file and file.filename and allowed_file(file.filename):
+        filename = secure_filename(f"{idno}_{file.filename}")
+        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        update_fields['profile_image'] = filename
+
+    updaterecord('students', 'idno', idno, **update_fields)
+
+    # Update session
+    session['student_firstname'] = firstname
+    session['student_lastname']  = lastname
+    session['student_course']    = course
+    session['student_level']     = level
+
+    flash('Profile updated successfully!', 'success')
+    return redirect(url_for('dashboard'))
+
 @app.route('/student/feedback', methods=['POST'])
 def submit_feedback():
     rr = login_required()
