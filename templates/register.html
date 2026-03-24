@@ -32,21 +32,6 @@
       font-weight: 700;
       letter-spacing: 0.01em;
     }
-    .btn-logout {
-      padding: 6px 18px;
-      background: #e8a020;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.84rem;
-      font-weight: 700;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      text-decoration: none;
-      letter-spacing: 0.01em;
-      transition: background 0.2s;
-    }
-    .btn-logout:hover { background: #cf8c18; }
 
     /* ── Page body ── */
     .page-body {
@@ -254,7 +239,6 @@
   <!-- Navbar -->
   <nav class="navbar">
     <span class="navbar-brand">College of Computer Studies Sit-in Monitoring System</span>
-    <a href="{{ url_for('login') }}" class="btn-logout">Log out</a>
   </nav>
 
   <!-- Flash messages -->
@@ -277,7 +261,7 @@
 
       <a href="{{ url_for('login') }}" class="btn-back">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        Back to Login
+        Back 
       </a>
 
       <div class="reg-title">Register Account</div>
