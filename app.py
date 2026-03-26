@@ -11,10 +11,17 @@ from dbhelper import (
     addrecord
 )
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "ccs-sitin-secret-change-this")
+
+UPLOAD_FOLDER = os.path.join('static', 'images', 'profiles')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
 init_database()
 
@@ -386,7 +393,7 @@ def update_reservation(res_id, status):
     return redirect(url_for('admin_reservations'))
 
 
-# ── Student: Feedback ─────────────────────────────────────
+# ── Student: Update Profile ───────────────────────────────
 
 @app.route('/student/update_profile', methods=['POST'])
 def update_profile():
@@ -405,24 +412,25 @@ def update_profile():
     confirm_pw = request.form.get('confirm_password', '').strip()
     remove_photo = request.form.get('remove_photo', '0')
 
-    # Check email uniqueness
-    if recordexists_exclude('students', 'idno', idno, email=email):
+    # Check email uniqueness (exclude current student)
+    if recordexists_exclude('students', 'email', email, 'idno', idno):
         flash('That email is already used by another account.', 'error')
         return redirect(url_for('dashboard'))
 
-    # Password change
+    # Build update fields
     update_fields = dict(
         firstname=firstname, lastname=lastname, middlename=middlename,
         email=email, address=address, course=course, level=level
     )
 
+    # Password change
     if new_pw:
         if new_pw != confirm_pw:
             flash('Passwords do not match.', 'error')
             return redirect(url_for('dashboard'))
         update_fields['password'] = generate_password_hash(new_pw)
 
-    # Handle photo
+    # Handle photo upload
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     file = request.files.get('profile_image')
     if remove_photo == '1':
@@ -442,6 +450,9 @@ def update_profile():
 
     flash('Profile updated successfully!', 'success')
     return redirect(url_for('dashboard'))
+
+
+# ── Student: Feedback ─────────────────────────────────────
 
 @app.route('/student/feedback', methods=['POST'])
 def submit_feedback():
@@ -480,4 +491,4 @@ def student_reserve():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
