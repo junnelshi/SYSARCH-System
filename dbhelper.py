@@ -2,6 +2,7 @@ import sqlite3
 import os
 from werkzeug.security import generate_password_hash
 
+
 def connect():
     base_path = os.path.dirname(os.path.abspath(__file__))
     db_path   = os.path.join(base_path, "sysarch.db")
@@ -16,19 +17,19 @@ def init_database():
 
     cur.execute('''
         CREATE TABLE IF NOT EXISTS students (
-            id             INTEGER PRIMARY KEY AUTOINCREMENT,
-            idno           VARCHAR(20)  UNIQUE NOT NULL,
-            lastname       VARCHAR(50)  NOT NULL,
-            firstname      VARCHAR(50)  NOT NULL,
-            middlename     VARCHAR(50),
-            course         VARCHAR(20)  NOT NULL,
-            level          VARCHAR(5)   NOT NULL,
-            email          VARCHAR(100) UNIQUE NOT NULL,
-            address        TEXT,
-            password       VARCHAR(255) NOT NULL,
-            image_filename VARCHAR(255),
+            id                INTEGER PRIMARY KEY AUTOINCREMENT,
+            idno              VARCHAR(20)  UNIQUE NOT NULL,
+            lastname          VARCHAR(50)  NOT NULL,
+            firstname         VARCHAR(50)  NOT NULL,
+            middlename        VARCHAR(50),
+            course            VARCHAR(20)  NOT NULL,
+            level             VARCHAR(5)   NOT NULL,
+            email             VARCHAR(100) UNIQUE NOT NULL,
+            address           TEXT,
+            password          VARCHAR(255) NOT NULL,
+            profile_image     VARCHAR(255),
             remaining_session INTEGER DEFAULT 30,
-            created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 
@@ -88,24 +89,29 @@ def init_database():
 
     cur.execute('''
         CREATE TABLE IF NOT EXISTS reservations (
-            id           INTEGER PRIMARY KEY AUTOINCREMENT,
-            idno         VARCHAR(20)  NOT NULL,
-            lab          VARCHAR(20)  NOT NULL,
-            date         DATE         NOT NULL,
-            time_slot    VARCHAR(50)  NOT NULL,
-            purpose      VARCHAR(100) NOT NULL,
-            status       VARCHAR(20)  DEFAULT 'pending',
-            created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            idno       VARCHAR(20)  NOT NULL,
+            lab        VARCHAR(20)  NOT NULL,
+            date       DATE         NOT NULL,
+            time_slot  VARCHAR(50)  NOT NULL,
+            purpose    VARCHAR(100) NOT NULL,
+            status     VARCHAR(20)  DEFAULT 'pending',
+            created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (idno) REFERENCES students(idno)
         )
     ''')
 
-    # Add remaining_session column if missing (migration)
-    try:
-        cur.execute("ALTER TABLE students ADD COLUMN remaining_session INTEGER DEFAULT 30")
-        conn.commit()
-    except:
-        pass
+    # Migrations — add columns if missing
+    migrations = [
+        "ALTER TABLE students ADD COLUMN profile_image VARCHAR(255)",
+        "ALTER TABLE students ADD COLUMN remaining_session INTEGER DEFAULT 30",
+    ]
+    for sql in migrations:
+        try:
+            cur.execute(sql)
+            conn.commit()
+        except Exception:
+            pass
 
     # Default admin
     cur.execute("SELECT COUNT(*) FROM users WHERE email = ?", ("admin@ccs.edu",))
@@ -206,7 +212,7 @@ def recordexists(table, **kwargs):
     try:
         cur.execute(f"SELECT COUNT(*) FROM {table} WHERE {field} = ?", (value,))
         return cur.fetchone()[0] > 0
-    except:
+    except Exception:
         return False
     finally:
         conn.close()
@@ -221,13 +227,13 @@ def recordexists_exclude(table, field, value, exclude_field, exclude_value):
             (value, exclude_value)
         )
         return cur.fetchone()[0] > 0
-    except:
+    except Exception:
         return False
     finally:
         conn.close()
 
 
-# ── Student functions ─────────────────────────────────────
+# ── Students ──────────────────────────────────────────────
 
 def get_student_by_idno(idno):
     return getone('students', idno=idno)
@@ -236,7 +242,7 @@ def get_student_by_idno(idno):
 def get_all_students():
     conn = connect()
     cur  = conn.cursor()
-    cur.execute("SELECT * FROM students ORDER BY idno ASC")
+    cur.execute("SELECT * FROM students ORDER BY lastname, firstname")
     rows = cur.fetchall()
     conn.close()
     return rows
@@ -245,12 +251,11 @@ def get_all_students():
 def search_students(query):
     conn = connect()
     cur  = conn.cursor()
-    q = f"%{query}%"
-    cur.execute("""
-        SELECT * FROM students
-        WHERE idno LIKE ? OR firstname LIKE ? OR lastname LIKE ?
-        ORDER BY idno ASC
-    """, (q, q, q))
+    like = f"%{query}%"
+    cur.execute(
+        "SELECT * FROM students WHERE idno LIKE ? OR firstname LIKE ? OR lastname LIKE ? ORDER BY lastname",
+        (like, like, like)
+    )
     rows = cur.fetchall()
     conn.close()
     return rows
@@ -259,33 +264,18 @@ def search_students(query):
 def reset_all_sessions():
     conn = connect()
     cur  = conn.cursor()
-    try:
-        cur.execute("UPDATE students SET remaining_session = 30")
-        conn.commit()
-        return True
-    except:
-        conn.rollback()
-        return False
-    finally:
-        conn.close()
-
-
-# ── Sit-in functions ──────────────────────────────────────
-
-def get_active_sitin():
-    conn = connect()
-    cur  = conn.cursor()
-    cur.execute("""
-        SELECT s.*, st.firstname, st.lastname, st.course, st.level
-        FROM sit_in s
-        JOIN students st ON s.idno = st.idno
-        WHERE s.status = 'active'
-        ORDER BY s.login_time DESC
-    """)
-    rows = cur.fetchall()
+    cur.execute("UPDATE students SET remaining_session = 30")
+    conn.commit()
     conn.close()
-    return rows
 
+
+# ── Users (admin) ─────────────────────────────────────────
+
+def get_user_by_email(email):
+    return getone('users', email=email)
+
+
+# ── Sit-in ────────────────────────────────────────────────
 
 def is_student_sitting_in(idno):
     conn = connect()
@@ -300,14 +290,12 @@ def sitin_student(idno, purpose, lab):
     conn = connect()
     cur  = conn.cursor()
     try:
-        # Insert active sit-in
         cur.execute(
             "INSERT INTO sit_in (idno, purpose, lab) VALUES (?, ?, ?)",
             (idno, purpose, lab)
         )
-        # Decrement session
         cur.execute(
-            "UPDATE students SET remaining_session = remaining_session - 1 WHERE idno = ? AND remaining_session > 0",
+            "UPDATE students SET remaining_session = remaining_session - 1 WHERE idno = ?",
             (idno,)
         )
         conn.commit()
@@ -324,14 +312,17 @@ def logout_student(sit_id):
     conn = connect()
     cur  = conn.cursor()
     try:
-        cur.execute("SELECT * FROM sit_in WHERE id = ? AND status = 'active'", (sit_id,))
+        # Get the sit-in record first
+        cur.execute("SELECT * FROM sit_in WHERE id = ?", (sit_id,))
         row = cur.fetchone()
         if not row:
             return False
-        cur.execute("""
-            INSERT INTO sit_in_records (idno, purpose, lab, login_time)
-            VALUES (?, ?, ?, ?)
-        """, (row['idno'], row['purpose'], row['lab'], row['login_time']))
+        # Copy to sit_in_records
+        cur.execute(
+            "INSERT INTO sit_in_records (idno, purpose, lab, login_time) VALUES (?, ?, ?, ?)",
+            (row['idno'], row['purpose'], row['lab'], row['login_time'])
+        )
+        # Remove from active sit_in
         cur.execute("DELETE FROM sit_in WHERE id = ?", (sit_id,))
         conn.commit()
         return True
@@ -343,45 +334,90 @@ def logout_student(sit_id):
         conn.close()
 
 
+def get_active_sitin():
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute('''
+        SELECT s.id, s.idno, st.firstname, st.lastname, st.course, st.level,
+               s.purpose, s.lab, s.login_time
+        FROM sit_in s
+        JOIN students st ON s.idno = st.idno
+        WHERE s.status = 'active'
+        ORDER BY s.login_time DESC
+    ''')
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
 def get_sitin_records():
     conn = connect()
     cur  = conn.cursor()
-    cur.execute("""
-        SELECT r.*, s.firstname, s.lastname, s.course, s.level
+    cur.execute('''
+        SELECT r.id, r.idno, st.firstname, st.lastname, st.course, st.level,
+               r.purpose, r.lab, r.login_time, r.logout_time
         FROM sit_in_records r
-        JOIN students s ON r.idno = s.idno
+        JOIN students st ON r.idno = st.idno
         ORDER BY r.logout_time DESC
-    """)
+    ''')
     rows = cur.fetchall()
     conn.close()
     return rows
 
 
 def get_sitin_stats():
+    """
+    Returns a dict with:
+      total_students  - int
+      currently_in    - int
+      total_sitins    - int
+      purpose_counts  - list of dicts [{'purpose': ..., 'cnt': ...}, ...]
+      lab_counts      - list of dicts [{'lab': ..., 'cnt': ...}, ...]
+    """
     conn = connect()
     cur  = conn.cursor()
+
     cur.execute("SELECT COUNT(*) FROM students")
     total_students = cur.fetchone()[0]
+
     cur.execute("SELECT COUNT(*) FROM sit_in WHERE status = 'active'")
     currently_in = cur.fetchone()[0]
+
     cur.execute("SELECT COUNT(*) FROM sit_in_records")
     total_sitins = cur.fetchone()[0]
-    cur.execute("""
-        SELECT purpose, COUNT(*) as cnt
-        FROM sit_in_records
-        GROUP BY purpose
-    """)
-    purpose_counts = cur.fetchall()
+
+    # Purpose breakdown (combine active + records)
+    cur.execute('''
+        SELECT purpose, COUNT(*) as cnt FROM (
+            SELECT purpose FROM sit_in
+            UNION ALL
+            SELECT purpose FROM sit_in_records
+        ) GROUP BY purpose ORDER BY cnt DESC
+    ''')
+    purpose_counts = [{'purpose': row['purpose'], 'cnt': row['cnt']} for row in cur.fetchall()]
+
+    # Lab breakdown
+    cur.execute('''
+        SELECT lab, COUNT(*) as cnt FROM (
+            SELECT lab FROM sit_in
+            UNION ALL
+            SELECT lab FROM sit_in_records
+        ) GROUP BY lab ORDER BY cnt DESC
+    ''')
+    lab_counts = [{'lab': row['lab'], 'cnt': row['cnt']} for row in cur.fetchall()]
+
     conn.close()
+
     return {
         'total_students': total_students,
-        'currently_in': currently_in,
-        'total_sitins': total_sitins,
-        'purpose_counts': [dict(r) for r in purpose_counts]
+        'currently_in':   currently_in,
+        'total_sitins':   total_sitins,
+        'purpose_counts': purpose_counts,  # always a list, never None/undefined
+        'lab_counts':     lab_counts,
     }
 
 
-# ── Announcement functions ────────────────────────────────
+# ── Announcements ─────────────────────────────────────────
 
 def get_all_announcements():
     conn = connect()
@@ -400,17 +436,17 @@ def delete_announcement(ann_id):
     return deleterecord('announcements', id=ann_id)
 
 
-# ── Feedback functions ────────────────────────────────────
+# ── Feedback ──────────────────────────────────────────────
 
 def get_all_feedback():
     conn = connect()
     cur  = conn.cursor()
-    cur.execute("""
-        SELECT f.*, s.firstname, s.lastname
+    cur.execute('''
+        SELECT f.*, st.firstname, st.lastname
         FROM feedback f
-        JOIN students s ON f.idno = s.idno
+        JOIN students st ON f.idno = st.idno
         ORDER BY f.created_at DESC
-    """)
+    ''')
     rows = cur.fetchall()
     conn.close()
     return rows
@@ -420,17 +456,17 @@ def add_feedback(idno, message, rating=5):
     return addrecord('feedback', idno=idno, message=message, rating=rating)
 
 
-# ── Reservation functions ─────────────────────────────────
+# ── Reservations ──────────────────────────────────────────
 
 def get_all_reservations():
     conn = connect()
     cur  = conn.cursor()
-    cur.execute("""
-        SELECT r.*, s.firstname, s.lastname, s.course
+    cur.execute('''
+        SELECT r.*, st.firstname, st.lastname, st.course
         FROM reservations r
-        JOIN students s ON r.idno = s.idno
-        ORDER BY r.date ASC, r.time_slot ASC
-    """)
+        JOIN students st ON r.idno = st.idno
+        ORDER BY r.created_at DESC
+    ''')
     rows = cur.fetchall()
     conn.close()
     return rows
@@ -439,7 +475,10 @@ def get_all_reservations():
 def get_student_reservations(idno):
     conn = connect()
     cur  = conn.cursor()
-    cur.execute("SELECT * FROM reservations WHERE idno = ? ORDER BY date DESC", (idno,))
+    cur.execute(
+        "SELECT * FROM reservations WHERE idno = ? ORDER BY created_at DESC",
+        (idno,)
+    )
     rows = cur.fetchall()
     conn.close()
     return rows
@@ -447,17 +486,3 @@ def get_student_reservations(idno):
 
 def update_reservation_status(res_id, status):
     return updaterecord('reservations', 'id', res_id, status=status)
-
-
-# ── User (admin) functions ────────────────────────────────
-
-def get_user_by_email(email):
-    return getone('users', email=email)
-
-
-def get_all_users():
-    return getall('users')
-
-
-def delete_user(user_id):
-    return deleterecord('users', id=user_id)
