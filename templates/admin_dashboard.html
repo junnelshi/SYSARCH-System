@@ -18,9 +18,7 @@
     <a href="#" onclick="openSearch();return false" class="nav-link">Search</a>
     <a href="{{ url_for('students_list') }}"        class="nav-link">Students</a>
     <a href="#" onclick="openSitin();return false"  class="nav-link">Sit-in</a>
-    <a href="{{ url_for('current_sitin') }}"        class="nav-link">View Sit-in Records</a>
     <a href="{{ url_for('sitin_records') }}"        class="nav-link">Sit-in Records</a>
-    <a href="{{ url_for('sitin_reports') }}"        class="nav-link">Sit-in Reports</a>
     <a href="{{ url_for('feedback_reports') }}"     class="nav-link">Feedback Reports</a>
     <a href="{{ url_for('admin_reservations') }}"   class="nav-link">Reservation</a>
     <a href="{{ url_for('logout') }}"               class="nav-logout">Log out</a>
@@ -236,6 +234,7 @@ function doSearch(q) {
     });
 }
 
+// Select student from search → close search → open sit-in form
 function selectStudent(idno, name, sessions) {
   closeSearch();
   document.getElementById('sitinIdno').value    = idno;
