@@ -22,11 +22,87 @@
     .nav-btn {
       color: rgba(255,255,255,0.9); padding: 6px 18px; border-radius: 5px;
       font-size: 0.88rem; font-weight: 500; text-decoration: none;
-      border: 1px solid rgba(255,255,255,0.3); transition: all 0.15s;
+      border: 1px solid transparent; transition: all 0.15s; cursor: pointer;
+      background: none;
     }
     .nav-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
     .nav-btn.logout { background: #e8a020; border-color: #e8a020; color: #fff; }
-    .nav-btn.logout:hover { background: #c98a18; border-color: #c98a18; }
+    .nav-btn.logout:hover { background: #c98a18; }
+
+    /* ── Notification Bell ── */
+    .notif-bell-wrap { position: relative; }
+    .notif-bell {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; width: 36px; height: 36px; border-radius: 8px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all .15s; position: relative;
+    }
+    .notif-bell:hover { background: rgba(255,255,255,0.25); }
+    .notif-bell svg { width: 17px; height: 17px; }
+    .notif-badge {
+      position: absolute; top: -5px; right: -5px;
+      background: #ef4444; color: #fff; font-size: 10px; font-weight: 700;
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #1a3560; animation: badgePulse 2s infinite;
+    }
+    @keyframes badgePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+    /* ── Notification Slide Panel ── */
+    .notif-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 999; display: none;
+    }
+    .notif-overlay.open { display: block; }
+    .notif-panel {
+      position: fixed; top: 0; right: 0; width: 360px; height: 100vh;
+      background: #fff; z-index: 1000;
+      transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1);
+      display: flex; flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+    }
+    .notif-panel.open { transform: translateX(0); }
+    .notif-panel-header {
+      padding: 18px 20px; border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(90deg, #1a3560, #2a5298);
+      color: #fff;
+    }
+    .notif-panel-header h3 { font-size: 0.95rem; font-weight: 700; }
+    .notif-panel-header span { font-size: 0.78rem; opacity: .75; }
+    .notif-close-btn {
+      background: rgba(255,255,255,0.15); border: none; color: #fff;
+      width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
+      font-size: 1rem; display: flex; align-items: center; justify-content: center;
+    }
+    .notif-actions { padding: 10px 16px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: flex-end; }
+    .notif-mark-all { background: none; border: none; color: #2a5298; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Inter',sans-serif; }
+    .notif-mark-all:hover { text-decoration: underline; }
+    .notif-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .notif-list::-webkit-scrollbar { width: 4px; }
+    .notif-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+    .notif-item {
+      padding: 12px 14px; border-radius: 10px; margin-bottom: 6px;
+      border: 1px solid #e2e8f0; cursor: pointer; transition: all .15s;
+      position: relative; overflow: hidden;
+    }
+    .notif-item.unread { background: #eff6ff; border-color: #bfdbfe; }
+    .notif-item.unread::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: #2a5298;
+    }
+    .notif-item:hover { border-color: #93c5fd; }
+    .notif-item-type {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; margin-bottom: 4px;
+    }
+    .notif-item-type.approved { color: #16a34a; }
+    .notif-item-type.rejected { color: #dc2626; }
+    .notif-item-type.info     { color: #2563eb; }
+    .notif-item-type.warning  { color: #d97706; }
+    .notif-item-msg { font-size: 0.83rem; color: #374151; line-height: 1.5; margin-bottom: 4px; }
+    .notif-item-time { font-size: 0.72rem; color: #9ca3af; }
+    .notif-empty { text-align: center; padding: 40px 20px; color: #9ca3af; font-size: 0.88rem; }
 
     /* ── Flash ── */
     .flash-wrap { max-width: 98%; margin: 16px auto 0; padding: 0 24px; }
@@ -35,7 +111,7 @@
       padding: 11px 18px; border-radius: 8px; font-size: 0.88rem;
       font-weight: 500; margin-bottom: 8px;
     }
-    .flash button { background: none; border: none; cursor: pointer; opacity: 0.5; font-size: 0.9rem; }
+    .flash button { background: none; border: none; cursor: pointer; opacity: 0.5; }
     .flash-success { background: #c6f6d5; border-left: 4px solid #38a169; color: #22543d; }
     .flash-error   { background: #fed7d7; border-left: 4px solid #e53e3e; color: #742a2a; }
     .flash-info    { background: #bee3f8; border-left: 4px solid #3182ce; color: #1a365d; }
@@ -50,11 +126,8 @@
     @media (max-width: 1100px) { .page-wrap { grid-template-columns: 260px 1fr; } .rules-panel { display: none; } }
     @media (max-width: 768px)  { .page-wrap { grid-template-columns: 1fr; } }
 
-    /* ── CARD BASE ── */
-    .card {
-      background: #fff; border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden;
-    }
+    /* ── Card ── */
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; }
     .card-header {
       background: linear-gradient(90deg, #2a5298, #3b6fd4);
       color: #fff; padding: 11px 18px; font-size: 0.9rem; font-weight: 700;
@@ -63,22 +136,17 @@
     .card-header svg { width: 16px; height: 16px; flex-shrink: 0; }
     .card-body { padding: 18px; }
 
-    /* ── LEFT: Student Info Panel ── */
+    /* ── Profile Panel ── */
     .student-panel { display: flex; flex-direction: column; gap: 16px; }
-
     .profile-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; }
-    .profile-banner {
-      height: 72px;
-      background: linear-gradient(135deg, #1a3560 0%, #2a5298 50%, #3b6fd4 100%);
-    }
+    .profile-banner { height: 72px; background: linear-gradient(135deg, #1a3560, #2a5298, #3b6fd4); }
     .profile-avatar-wrap { display: flex; justify-content: center; margin-top: -38px; }
     .avatar-container { position: relative; width: 76px; height: 76px; cursor: pointer; }
     .profile-avatar {
       width: 76px; height: 76px; border-radius: 50%;
       background: linear-gradient(135deg, #2a5298, #63b3ed);
       border: 4px solid #fff; box-shadow: 0 4px 14px rgba(42,82,152,0.3);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
     .profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .profile-avatar svg { width: 38px; height: 38px; }
@@ -92,43 +160,28 @@
     .avatar-overlay svg { width: 18px; height: 18px; color: #fff; }
     .avatar-overlay span { color: #fff; font-size: 0.58rem; font-weight: 700; margin-top: 2px; }
     #avatar-input { display: none; }
-
     .student-info-body { padding: 10px 18px 16px; }
     .student-name { font-size: 1rem; font-weight: 800; color: #1a202c; text-align: center; margin-bottom: 2px; }
     .student-course-tag { font-size: 0.78rem; color: #718096; text-align: center; margin-bottom: 14px; }
     .info-divider { height: 1px; background: #f0f4f8; margin: 8px 0 12px; }
-
-    .info-row {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 0; border-bottom: 1px solid #f7fafc; font-size: 0.83rem;
-    }
+    .info-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid #f7fafc; font-size: 0.83rem; }
     .info-row:last-child { border-bottom: none; }
     .info-icon { color: #2a5298; flex-shrink: 0; }
     .info-icon svg { width: 14px; height: 14px; display: block; }
     .info-label { color: #718096; font-weight: 600; min-width: 58px; }
     .info-value { color: #1a202c; font-weight: 500; word-break: break-all; }
-
-    /* Session bar */
+    .points-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: linear-gradient(90deg,#f59e0b,#d97706);
+      color: #fff; font-size: 0.72rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+    }
     .session-wrap { padding: 10px 18px 16px; }
     .session-top { display: flex; justify-content: space-between; font-size: 0.76rem; color: #718096; margin-bottom: 6px; font-weight: 600; }
     .session-bar-bg { background: #e2e8f0; border-radius: 6px; height: 9px; overflow: hidden; }
     .session-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
 
-    /* Side nav menu */
-    .side-menu { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); padding: 10px; }
-    .side-menu-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; border-radius: 9px; font-size: 0.84rem;
-      color: #4a5568; font-weight: 500; cursor: pointer; transition: all 0.15s;
-      border: none; background: none; width: 100%; text-align: left;
-    }
-    .side-menu-item:hover { background: #f0f4f8; color: #2a5298; }
-    .side-menu-item.active { background: #ebf4ff; color: #2a5298; font-weight: 700; }
-    .side-menu-item svg { width: 17px; height: 17px; flex-shrink: 0; }
-    .side-menu-item span:not(.menu-badge) { flex: 1; }
-    .menu-badge { background: #e2e8f0; color: #4a5568; border-radius: 10px; padding: 1px 7px; font-size: 0.7rem; font-weight: 700; }
-
-    /* ── MIDDLE: Content Panel ── */
+    /* ── Content Tabs ── */
     .content-panel { display: flex; flex-direction: column; gap: 18px; }
     .tab-pane { display: none; flex-direction: column; gap: 18px; }
     .tab-pane.active { display: flex; }
@@ -141,83 +194,11 @@
     .ann-meta { font-size: 0.76rem; font-weight: 700; color: #2a5298; margin-bottom: 5px; }
     .ann-text { font-size: 0.9rem; color: #4a5568; line-height: 1.6; }
 
-    /* Form fields */
-    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
-    .form-grid-2 .full { grid-column: 1 / -1; }
-    .form-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
-    .form-field label { font-size: 0.72rem; color: #718096; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-    .form-input {
-      width: 100%; padding: 10px 13px; border: 1.5px solid #e2e8f0; border-radius: 9px;
-      font-size: 0.88rem; font-family: 'Inter', sans-serif; outline: none;
-      transition: border 0.15s; color: #1a202c; background: #fff;
-    }
-    .form-input:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,0.1); }
-    .form-input:disabled { background: #f7fafc; color: #a0aec0; cursor: not-allowed; }
-    textarea.form-input { resize: vertical; }
-
-    .star-rating { display: flex; gap: 4px; margin-bottom: 14px; flex-direction: row-reverse; justify-content: flex-end; }
-    .star-rating input { display: none; }
-    .star-rating label { font-size: 1.8rem; cursor: pointer; color: #e2e8f0; line-height: 1; transition: color 0.1s; }
-    .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: #d69e2e; }
-
-    .btn-submit {
-      width: 100%; padding: 11px; background: #2a5298; color: #fff;
-      border: none; border-radius: 9px; font-size: 0.92rem; font-weight: 700;
-      font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s;
-    }
-    .btn-submit:hover { background: #1a3560; }
-    .btn-submit.green { background: #38a169; }
-    .btn-submit.green:hover { background: #276749; }
-    .btn-row { display: flex; gap: 10px; margin-top: 8px; }
-    .btn-outline {
-      flex: 1; padding: 10px; background: #fff; color: #4a5568;
-      border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 0.88rem;
-      font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s;
-    }
-    .btn-outline:hover { border-color: #cbd5e0; background: #f7fafc; }
-
-    .edit-photo-section {
-      display: flex; align-items: center; gap: 18px;
-      padding: 16px 18px; background: #f7fafc; border-radius: 10px;
-      margin-bottom: 18px; border: 1.5px dashed #e2e8f0;
-    }
-    .edit-avatar-preview {
-      width: 68px; height: 68px; border-radius: 50%;
-      background: linear-gradient(135deg, #2a5298, #63b3ed);
-      border: 3px solid #e2e8f0; overflow: hidden; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .edit-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
-    .edit-avatar-preview svg { width: 30px; height: 30px; }
-    .edit-photo-actions { display: flex; flex-direction: column; gap: 6px; }
-    .edit-photo-actions p { font-size: 0.77rem; color: #718096; }
-    .btn-upload-photo {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px; background: #2a5298; color: #fff;
-      border: none; border-radius: 7px; font-size: 0.8rem;
-      font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer;
-    }
-    .btn-upload-photo:hover { background: #1a3560; }
-    .btn-remove-photo {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 5px 12px; background: #fff; color: #e53e3e;
-      border: 1.5px solid #fed7d7; border-radius: 7px; font-size: 0.8rem;
-      font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer;
-    }
-    .btn-remove-photo:hover { background: #fff5f5; }
-
-    .section-label {
-      font-size: 0.7rem; font-weight: 700; color: #a0aec0;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      margin: 16px 0 10px; padding-bottom: 8px;
-      border-bottom: 1px solid #f0f4f8;
-    }
-
-    /* Reservations table */
-    .res-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    .res-table th { background: #f7fafc; font-weight: 700; color: #718096; padding: 10px 14px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
-    .res-table td { padding: 10px 14px; border-bottom: 1px solid #f0f4f8; color: #2d3748; }
-    .res-table tr:last-child td { border-bottom: none; }
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th { background: #f7fafc; font-weight: 700; color: #718096; padding: 10px 14px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em; }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid #f0f4f8; color: #2d3748; }
+    .data-table tr:last-child td { border-bottom: none; }
     .badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 20px; padding: 3px 10px; font-size: 0.73rem; font-weight: 700; }
     .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
     .badge-pending  { background: #fefcbf; color: #744210; }
@@ -227,32 +208,155 @@
     .badge-rejected { background: #fed7d7; color: #742a2a; }
     .badge-rejected::before { background: #e53e3e; }
 
-    /* ── RIGHT: Rules Panel ── */
-    .rules-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; position: sticky; top: 78px; }
-    .rules-body {
-      padding: 18px; max-height: calc(100vh - 130px);
-      overflow-y: auto; font-size: 0.84rem; color: #4a5568; line-height: 1.7;
+    /* ── Form Elements ── */
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+    .form-grid-2 .full { grid-column: 1 / -1; }
+    .form-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
+    .form-field label { font-size: 0.72rem; color: #718096; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .form-input {
+      width: 100%; padding: 10px 13px; border: 1.5px solid #e2e8f0; border-radius: 9px;
+      font-size: 0.88rem; font-family: 'Inter', sans-serif; outline: none;
+      transition: border .15s; color: #1a202c; background: #fff;
     }
+    .form-input:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,.1); }
+    .form-input:disabled { background: #f7fafc; color: #a0aec0; cursor: not-allowed; }
+    textarea.form-input { resize: vertical; }
+    .star-rating { display: flex; gap: 4px; margin-bottom: 14px; flex-direction: row-reverse; justify-content: flex-end; }
+    .star-rating input { display: none; }
+    .star-rating label { font-size: 1.8rem; cursor: pointer; color: #e2e8f0; line-height: 1; transition: color .1s; }
+    .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: #d69e2e; }
+    .btn-submit { width: 100%; padding: 11px; background: #2a5298; color: #fff; border: none; border-radius: 9px; font-size: 0.92rem; font-weight: 700; font-family: 'Inter',sans-serif; cursor: pointer; transition: all .15s; }
+    .btn-submit:hover { background: #1a3560; }
+    .btn-submit:disabled { background: #cbd5e0; color: #a0aec0; cursor: not-allowed; }
+    .btn-submit.green { background: #38a169; }
+    .btn-submit.green:hover { background: #276749; }
+    .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+    .btn-outline { flex: 1; padding: 10px; background: #fff; color: #4a5568; border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 0.88rem; font-weight: 600; font-family: 'Inter',sans-serif; cursor: pointer; transition: all .15s; }
+    .btn-outline:hover { border-color: #cbd5e0; background: #f7fafc; }
+    .section-label { font-size: .7rem; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .08em; margin: 16px 0 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f4f8; }
+    .edit-photo-section { display: flex; align-items: center; gap: 18px; padding: 16px 18px; background: #f7fafc; border-radius: 10px; margin-bottom: 18px; border: 1.5px dashed #e2e8f0; }
+    .edit-avatar-preview { width: 68px; height: 68px; border-radius: 50%; background: linear-gradient(135deg,#2a5298,#63b3ed); border: 3px solid #e2e8f0; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .edit-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .edit-avatar-preview svg { width: 30px; height: 30px; }
+    .edit-photo-actions { display: flex; flex-direction: column; gap: 6px; }
+    .edit-photo-actions p { font-size: .77rem; color: #718096; }
+    .btn-upload-photo { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #2a5298; color: #fff; border: none; border-radius: 7px; font-size: .8rem; font-weight: 600; font-family: 'Inter',sans-serif; cursor: pointer; }
+    .btn-upload-photo:hover { background: #1a3560; }
+    .btn-remove-photo { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: #fff; color: #e53e3e; border: 1.5px solid #fed7d7; border-radius: 7px; font-size: .8rem; font-weight: 600; font-family: 'Inter',sans-serif; cursor: pointer; }
+    .btn-remove-photo:hover { background: #fff5f5; }
+
+    /* ── PC Lab Picker ── */
+    .lab-tabs-wrap { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 16px; }
+    .lab-tab { padding: 6px 14px; border-radius: 7px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1.5px solid #e2e8f0; color: #718096; background: #fff; font-family: 'Inter',sans-serif; transition: all .15s; }
+    .lab-tab.active { background: #2a5298; color: #fff; border-color: #2a5298; }
+    .lab-tab:hover:not(.active) { border-color: #2a5298; color: #2a5298; }
+    .pc-legend { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+    .pc-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #718096; }
+    .pc-legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .teacher-bar { background: linear-gradient(90deg,rgba(42,82,152,.08),rgba(42,82,152,.04)); border: 1px dashed rgba(42,82,152,.3); border-radius: 6px; padding: 6px 12px; text-align: center; font-size: 0.72rem; color: #2a5298; font-weight: 700; letter-spacing: .04em; margin-bottom: 16px; }
+    .row-label { font-size: 0.7rem; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; margin-top: 4px; }
+    .pc-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 14px; }
+    .pc-unit { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; position: relative; }
+    .pc-unit.reserved { cursor: not-allowed; opacity: .6; }
+    .pc-unit.pending  { cursor: not-allowed; opacity: .75; }
+    .pc-box { width: 50px; height: 40px; background: #f7fafc; border: 1.5px solid #e2e8f0; border-radius: 7px; display: flex; align-items: center; justify-content: center; transition: all .15s; position: relative; }
+    .pc-unit:not(.reserved):not(.pending):not(.selected):hover .pc-box { border-color: #2a5298; background: rgba(42,82,152,.06); }
+    .pc-unit.selected .pc-box { border-color: #2a5298; background: rgba(42,82,152,.1); box-shadow: 0 0 0 2px rgba(42,82,152,.2); }
+    .pc-unit.reserved .pc-box { border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.04); }
+    .pc-unit.pending .pc-box  { border-color: rgba(245,158,11,.3); background: rgba(245,158,11,.04); }
+    .pc-screen { width: 34px; height: 24px; background: #e2e8f0; border-radius: 3px; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+    .pc-unit.selected .pc-screen { background: rgba(42,82,152,.2); }
+    .pc-unit.reserved .pc-screen { background: rgba(239,68,68,.12); }
+    .pc-unit.pending .pc-screen  { background: rgba(245,158,11,.12); }
+    .pc-stand { width: 8px; height: 5px; background: #cbd5e0; border-radius: 0 0 2px 2px; }
+    .pc-base  { width: 20px; height: 2px; background: #cbd5e0; border-radius: 1px; }
+    .pc-label { font-size: 0.65rem; color: #718096; font-weight: 600; }
+    .status-pip { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid #fff; }
+    .status-pip.green  { background: #22c55e; }
+    .status-pip.red    { background: #ef4444; }
+    .status-pip.amber  { background: #f59e0b; }
+    .status-pip.blue   { background: #2a5298; }
+    .pc-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 6px; }
+    .pc-stat { background: #f7fafc; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #e2e8f0; }
+    .pc-stat-num { font-size: 1.1rem; font-weight: 800; }
+    .pc-stat-num.green { color: #16a34a; }
+    .pc-stat-num.red   { color: #dc2626; }
+    .pc-stat-num.amber { color: #d97706; }
+    .pc-stat-lbl { font-size: 0.68rem; color: #9ca3af; margin-top: 1px; }
+    .selected-pc-box { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 9px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+    .selected-pc-box .icon { font-size: 1.4rem; }
+    .selected-pc-label { font-size: 0.88rem; font-weight: 700; color: #1e40af; }
+    .selected-pc-sub   { font-size: 0.75rem; color: #3b82f6; }
+
+    /* ── Rules Panel ── */
+    .rules-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.08); overflow: hidden; position: sticky; top: 78px; }
+    .rules-body { padding: 18px; max-height: calc(100vh - 130px); overflow-y: auto; font-size: .84rem; color: #4a5568; line-height: 1.7; }
     .rules-body::-webkit-scrollbar { width: 4px; }
     .rules-body::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
     .rules-institution { text-align: center; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #f0f4f8; }
-    .rules-institution h3 { font-size: 0.95rem; font-weight: 800; color: #1a202c; margin-bottom: 4px; }
-    .rules-institution p { font-size: 0.78rem; font-weight: 700; color: #2a5298; text-transform: uppercase; letter-spacing: 0.04em; }
-    .rules-heading { font-size: 0.8rem; font-weight: 800; color: #1a202c; text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 10px; }
-    .rules-body p { margin-bottom: 10px; font-size: 0.83rem; }
+    .rules-institution h3 { font-size: .95rem; font-weight: 800; color: #1a202c; margin-bottom: 4px; }
+    .rules-institution p  { font-size: .78rem; font-weight: 700; color: #2a5298; text-transform: uppercase; letter-spacing: .04em; }
+    .rules-heading { font-size: .8rem; font-weight: 800; color: #1a202c; text-transform: uppercase; letter-spacing: .04em; margin: 14px 0 10px; }
     .rules-body ol { padding-left: 16px; }
-    .rules-body ol li { margin-bottom: 9px; font-size: 0.82rem; }
+    .rules-body ol li { margin-bottom: 9px; font-size: .82rem; }
   </style>
 </head>
 <body>
 
 <!-- Navbar -->
 <nav class="navbar">
-  <span class="navbar-brand">College of Computer Studies Sit-in Monitoring System</span>
+  <span class="navbar-brand">Student Dashboard</span>
   <div class="navbar-links">
-    <a href="{{ url_for('logout') }}" class="nav-btn logout">Logout</a>
+    <a href="#" class="nav-btn" onclick="showTab('announcements');return false;">Home</a>
+    <a href="#" class="nav-btn" onclick="showTab('sitin-history');return false;">Sit-in History</a>
+    <a href="#" class="nav-btn" onclick="showTab('editprofile');return false;">Edit Profile</a>
+    <a href="#" class="nav-btn" onclick="showTab('myreservations');return false;">My Reservations</a>
+    <a href="#" class="nav-btn" onclick="showTab('reserve');return false;">Reserve</a>
+    <a href="#" class="nav-btn" onclick="showTab('feedback');return false;">Feedback</a>
+
+    <!-- Notification Bell -->
+    <div class="notif-bell-wrap">
+      <button class="notif-bell" onclick="openNotifPanel()" title="Notifications">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        {% if unread_count and unread_count > 0 %}
+          <span class="notif-badge" id="notifBadge">{{ unread_count if unread_count < 100 else '99+' }}</span>
+        {% else %}
+          <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+        {% endif %}
+      </button>
+    </div>
+
+    <a href="{{ url_for('logout') }}" class="nav-btn logout">Log out</a>
   </div>
 </nav>
+
+<!-- Notification Overlay & Panel -->
+<div class="notif-overlay" id="notifOverlay" onclick="closeNotifPanel()"></div>
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-header">
+    <div>
+      <h3>Notifications</h3>
+      <span id="unreadLabel">{{ unread_count }} unread</span>
+    </div>
+    <button class="notif-close-btn" onclick="closeNotifPanel()">✕</button>
+  </div>
+  <div class="notif-actions">
+    <button class="notif-mark-all" onclick="markAllRead()">Mark all as read</button>
+  </div>
+  <div class="notif-list" id="notifList">
+    {% for n in notifications %}
+      <div class="notif-item {{ 'unread' if not n.is_read else '' }}" id="notif-{{ n.id }}" onclick="markRead({{ n.id }})">
+        <div class="notif-item-type {{ n.type }}">{{ n.type | upper }}</div>
+        <div class="notif-item-msg">{{ n.message }}</div>
+        <div class="notif-item-time">{{ n.created_at[:16] if n.created_at else '' }}</div>
+      </div>
+    {% else %}
+      <div class="notif-empty" id="notifEmpty">No notifications yet.</div>
+    {% endfor %}
+  </div>
+</div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -271,7 +375,6 @@
 
   <!-- ══ LEFT: Student Info ══ -->
   <aside class="student-panel">
-
     <div class="profile-card">
       <div class="profile-banner"></div>
       <div class="profile-avatar-wrap">
@@ -287,10 +390,7 @@
             {% endif %}
           </div>
           <div class="avatar-overlay">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             <span>Edit</span>
           </div>
           <input type="file" id="avatar-input" accept="image/*" onchange="previewAvatar(event)"/>
@@ -301,21 +401,10 @@
         <div class="student-name">{{ session.get('student_firstname') }} {{ session.get('student_lastname') }}</div>
         <div class="student-course-tag">{{ session.get('student_course') }} — Year {{ session.get('student_level') }}</div>
         <div class="info-divider"></div>
-
         <div class="info-row">
           <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></span>
-          <span class="info-label">Name:</span>
-          <span class="info-value">{{ session.get('student_firstname') }} {{ session.get('student_lastname') }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6"/></svg></span>
-          <span class="info-label">Course:</span>
-          <span class="info-value">{{ session.get('student_course') }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></span>
-          <span class="info-label">Year:</span>
-          <span class="info-value">{{ session.get('student_level') }}</span>
+          <span class="info-label">ID No:</span>
+          <span class="info-value">{{ session.get('student_id') }}</span>
         </div>
         <div class="info-row">
           <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></span>
@@ -323,14 +412,14 @@
           <span class="info-value">{{ student.email if student else '—' }}</span>
         </div>
         <div class="info-row">
-          <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span>
-          <span class="info-label">Address:</span>
-          <span class="info-value">{{ student.address if student and student.address else '—' }}</span>
-        </div>
-        <div class="info-row">
           <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
           <span class="info-label">Session:</span>
           <span class="info-value">{{ student.remaining_session if student else 30 }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></span>
+          <span class="info-label">Points:</span>
+          <span class="info-value"><span class="points-badge">⭐ {{ student.points if student and student.points else 0 }}</span></span>
         </div>
       </div>
 
@@ -347,44 +436,17 @@
         </div>
       </div>
     </div>
-
-    <!-- Side Nav -->
-    <div class="side-menu">
-      <button class="side-menu-item active" onclick="showTab('announcements', this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-        <span>Announcements</span>
-        {% if announcements %}<span class="menu-badge">{{ announcements|length }}</span>{% endif %}
-      </button>
-      <button class="side-menu-item" onclick="showTab('editprofile', this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        <span>Edit Profile</span>
-      </button>
-      <button class="side-menu-item" onclick="showTab('feedback', this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-        <span>Submit Feedback</span>
-      </button>
-      <button class="side-menu-item" onclick="showTab('reserve', this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        <span>Reserve a Lab</span>
-      </button>
-      <button class="side-menu-item" onclick="showTab('myreservations', this)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        <span>My Reservations</span>
-        {% if reservations %}<span class="menu-badge" style="background:#2a5298;color:#fff;">{{ reservations|length }}</span>{% endif %}
-      </button>
-    </div>
-
   </aside>
 
   <!-- ══ MIDDLE: Content ══ -->
   <main class="content-panel">
 
-    <!-- Announcements -->
+    <!-- ── Announcements ── -->
     <div id="tab-announcements" class="tab-pane active">
       <div class="card">
         <div class="card-header">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
-          Announcement
+          Announcements
         </div>
         <div class="card-body">
           {% for ann in announcements %}
@@ -402,7 +464,71 @@
       </div>
     </div>
 
-    <!-- Edit Profile -->
+    <!-- ── Sit-in History ── -->
+    <div id="tab-sitin-history" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Sit-in History
+        </div>
+        <div class="card-body" style="padding:0;">
+          {% if sitin_history %}
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Lab</th>
+                  <th>Purpose</th>
+                  <th>Login Time</th>
+                  <th>Logout Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in sitin_history %}
+                <tr>
+                  <td>{{ loop.index }}</td>
+                  <td><strong>{{ r.lab }}</strong></td>
+                  <td>{{ r.purpose }}</td>
+                  <td>{{ r.login_time[:16] if r.login_time else '—' }}</td>
+                  <td>{{ r.logout_time[:16] if r.logout_time else '—' }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="no-data">No sit-in history yet.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Feedback form inside history tab -->
+      <div class="card">
+        <div class="card-header">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+          Leave Feedback
+        </div>
+        <div class="card-body">
+          <form action="{{ url_for('submit_feedback') }}" method="POST">
+            <div class="form-field">
+              <label>Rating</label>
+              <div class="star-rating">
+                {% for i in [5,4,3,2,1] %}
+                  <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if i==5 %}checked{% endif %}/>
+                  <label for="star{{ i }}">★</label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Message</label>
+              <textarea name="message" class="form-input" rows="3" placeholder="Share your experience…" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit green" style="margin-top:8px;">Submit Feedback (+2 pts)</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Edit Profile ── -->
     <div id="tab-editprofile" class="tab-pane">
       <div class="card">
         <div class="card-header">
@@ -417,9 +543,7 @@
                 {% if student and student.profile_image %}
                   <img id="edit-preview-img" src="{{ url_for('static', filename='uploads/' + student.profile_image) }}" alt="Preview"/>
                 {% else %}
-                  <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.5" id="edit-preview-svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                  </svg>
+                  <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="1.5" id="edit-preview-svg"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                   <img id="edit-preview-img" src="" style="display:none;" alt="Preview"/>
                 {% endif %}
               </div>
@@ -436,7 +560,6 @@
                 </button>
               </div>
             </div>
-
             <div class="section-label">Personal Information</div>
             <div class="form-grid-2">
               <div class="form-field"><label>First Name</label><input type="text" name="firstname" class="form-input" value="{{ student.firstname if student else session.get('student_firstname','') }}" required/></div>
@@ -445,7 +568,6 @@
               <div class="form-field"><label>Email</label><input type="email" name="email" class="form-input" value="{{ student.email if student else '' }}" required/></div>
               <div class="form-field full"><label>Address</label><input type="text" name="address" class="form-input" value="{{ student.address if student else '' }}"/></div>
             </div>
-
             <div class="section-label">Academic Information</div>
             <div class="form-grid-2">
               <div class="form-field">
@@ -466,80 +588,106 @@
               </div>
               <div class="form-field"><label>Student ID</label><input type="text" class="form-input" value="{{ session.get('student_id') }}" disabled/></div>
             </div>
-
             <div class="section-label">Change Password <span style="font-weight:400;color:#a0aec0;">(leave blank to keep current)</span></div>
             <div class="form-grid-2">
               <div class="form-field"><label>New Password</label><input type="password" name="new_password" class="form-input" placeholder="New password"/></div>
               <div class="form-field"><label>Confirm New Password</label><input type="password" name="confirm_password" class="form-input" placeholder="Repeat new password"/></div>
             </div>
-
             <input type="hidden" name="remove_photo" id="remove-photo-flag" value="0"/>
             <div class="btn-row">
               <button type="submit" class="btn-submit" style="flex:2;">Save Changes</button>
-              <button type="button" class="btn-outline" onclick="showTab('announcements', document.querySelector('.side-menu-item'))">Cancel</button>
+              <button type="button" class="btn-outline" onclick="showTab('announcements')">Cancel</button>
             </div>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- Feedback -->
-    <div id="tab-feedback" class="tab-pane">
-      <div class="card">
-        <div class="card-header">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-          Submit Feedback
-        </div>
-        <div class="card-body">
-          <form action="{{ url_for('submit_feedback') }}" method="POST">
-            <div class="form-field"><label>Your Rating</label>
-              <div class="star-rating">
-                <input type="radio" name="rating" id="s1" value="1"/><label for="s1">★</label>
-                <input type="radio" name="rating" id="s2" value="2"/><label for="s2">★</label>
-                <input type="radio" name="rating" id="s3" value="3"/><label for="s3">★</label>
-                <input type="radio" name="rating" id="s4" value="4"/><label for="s4">★</label>
-                <input type="radio" name="rating" id="s5" value="5" checked/><label for="s5">★</label>
-              </div>
-            </div>
-            <div class="form-field"><label>Message</label><textarea name="message" class="form-input" rows="5" placeholder="Share your experience…" required></textarea></div>
-            <button type="submit" class="btn-submit green">Submit Feedback</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reserve a Lab -->
+    <!-- ── Reserve a Lab ── -->
     <div id="tab-reserve" class="tab-pane">
       <div class="card">
         <div class="card-header">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          Reserve a Lab
+          Reserve a PC
         </div>
         <div class="card-body">
-          <form action="{{ url_for('student_reserve') }}" method="POST">
-            <div class="form-field"><label>Lab</label>
-              <select name="lab" class="form-input" required>
-                <option value="">-- Select Lab --</option>
-                <option>524</option><option>526</option><option>528</option><option>530</option><option>542</option>
-              </select>
+          <form action="{{ url_for('student_reserve') }}" method="POST" id="reserveForm">
+
+            <!-- Step 1: Pick date & lab first -->
+            <div class="form-grid-2" style="margin-bottom:16px;">
+              <div class="form-field">
+                <label>Date</label>
+                <input type="date" name="date" id="resDate" class="form-input" required onchange="loadPcGrid()"/>
+              </div>
+              <div class="form-field">
+                <label>Time Slot</label>
+                <select name="time_slot" class="form-input" required>
+                  <option value="">-- Select Time --</option>
+                  <option>7:30 AM – 9:00 AM</option>
+                  <option>9:00 AM – 10:30 AM</option>
+                  <option>10:30 AM – 12:00 PM</option>
+                  <option>1:00 PM – 2:30 PM</option>
+                  <option>2:30 PM – 4:00 PM</option>
+                  <option>4:00 PM – 5:30 PM</option>
+                </select>
+              </div>
             </div>
-            <div class="form-field" style="margin-top:12px;"><label>Date</label><input type="date" name="date" class="form-input" required/></div>
-            <div class="form-field" style="margin-top:12px;"><label>Time Slot</label>
-              <select name="time_slot" class="form-input" required>
-                <option value="">-- Select Time --</option>
-                <option>7:30 AM – 9:00 AM</option><option>9:00 AM – 10:30 AM</option>
-                <option>10:30 AM – 12:00 PM</option><option>1:00 PM – 2:30 PM</option>
-                <option>2:30 PM – 4:00 PM</option><option>4:00 PM – 5:30 PM</option>
-              </select>
+
+            <!-- Lab tabs -->
+            <div class="form-field" style="margin-bottom:12px;">
+              <label>Select Lab Room</label>
+              <div class="lab-tabs-wrap" id="labTabsWrap">
+                {% for lab in ['524','526','528','530','542'] %}
+                  <button type="button" class="lab-tab {% if loop.first %}active{% endif %}"
+                    onclick="switchLab(this, '{{ lab }}')" data-lab="{{ lab }}">
+                    Lab {{ lab }}
+                  </button>
+                {% endfor %}
+              </div>
             </div>
-            <div class="form-field" style="margin-top:12px;"><label>Purpose</label><input type="text" name="purpose" class="form-input" placeholder="e.g. C Programming, Research…" required/></div>
-            <button type="submit" class="btn-submit" style="margin-top:16px;">Submit Reservation</button>
+
+            <!-- Hidden lab input -->
+            <input type="hidden" name="lab" id="selectedLab" value="524"/>
+            <!-- Hidden PC number input -->
+            <input type="hidden" name="pc_number" id="selectedPcNumber" value=""/>
+
+            <!-- PC Grid -->
+            <div class="form-field" style="margin-bottom:14px;">
+              <label>Select a PC — Click to choose your seat</label>
+              <div class="teacher-bar">▬▬ Instructor / Teacher Desk ▬▬</div>
+              <div class="pc-legend">
+                <div class="pc-legend-item"><span class="pc-legend-dot" style="background:#22c55e;"></span> Available</div>
+                <div class="pc-legend-item"><span class="pc-legend-dot" style="background:#ef4444;"></span> Reserved</div>
+                <div class="pc-legend-item"><span class="pc-legend-dot" style="background:#f59e0b;"></span> Pending</div>
+                <div class="pc-legend-item"><span class="pc-legend-dot" style="background:#2a5298;"></span> Selected</div>
+              </div>
+              <div class="row-label">Row A — PCs 01–10</div>
+              <div class="pc-grid" id="pcGridA"></div>
+              <div class="row-label">Row B — PCs 11–20</div>
+              <div class="pc-grid" id="pcGridB"></div>
+              <div class="pc-stats" id="pcStats"></div>
+            </div>
+
+            <!-- Selected PC display -->
+            <div class="selected-pc-box" id="selectedPcDisplay" style="display:none;">
+              <span class="icon">🖥️</span>
+              <div>
+                <div class="selected-pc-label" id="selectedPcLabel">—</div>
+                <div class="selected-pc-sub">Click another PC to change your selection</div>
+              </div>
+            </div>
+
+            <div class="form-field" style="margin-top:4px;">
+              <label>Purpose</label>
+              <input type="text" name="purpose" class="form-input" placeholder="e.g. C Programming, Research…" required/>
+            </div>
+            <button type="submit" class="btn-submit" style="margin-top:14px;" id="reserveSubmitBtn">Submit Reservation</button>
           </form>
         </div>
       </div>
     </div>
 
-    <!-- My Reservations -->
+    <!-- ── My Reservations ── -->
     <div id="tab-myreservations" class="tab-pane">
       <div class="card">
         <div class="card-header">
@@ -548,13 +696,16 @@
         </div>
         <div class="card-body" style="padding:0;">
           {% if reservations %}
-            <table class="res-table">
-              <thead><tr><th>Lab</th><th>Date</th><th>Time Slot</th><th>Purpose</th><th>Status</th></tr></thead>
+            <table class="data-table">
+              <thead><tr><th>Lab</th><th>PC</th><th>Date</th><th>Time Slot</th><th>Purpose</th><th>Status</th></tr></thead>
               <tbody>
                 {% for r in reservations %}
                 <tr>
                   <td><strong>{{ r.lab }}</strong></td>
-                  <td>{{ r.date }}</td><td>{{ r.time_slot }}</td><td>{{ r.purpose }}</td>
+                  <td>{{ ('PC-' + r.pc_number) if r.pc_number else '—' }}</td>
+                  <td>{{ r.date }}</td>
+                  <td>{{ r.time_slot }}</td>
+                  <td>{{ r.purpose }}</td>
                   <td><span class="badge badge-{{ r.status }}">{{ r.status|capitalize }}</span></td>
                 </tr>
                 {% endfor %}
@@ -567,14 +718,42 @@
       </div>
     </div>
 
+    <!-- ── Feedback (standalone tab) ── -->
+    <div id="tab-feedback" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+          Leave Feedback
+        </div>
+        <div class="card-body">
+          <form action="{{ url_for('submit_feedback') }}" method="POST">
+            <div class="form-field">
+              <label>Rating</label>
+              <div class="star-rating">
+                {% for i in [5,4,3,2,1] %}
+                  <input type="radio" id="fb2star{{ i }}" name="rating" value="{{ i }}" {% if i==5 %}checked{% endif %}/>
+                  <label for="fb2star{{ i }}">★</label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Message</label>
+              <textarea name="message" class="form-input" rows="4" placeholder="Share your experience in the lab…" required></textarea>
+            </div>
+            <button type="submit" class="btn-submit green" style="margin-top:8px;">Submit Feedback (+2 pts)</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <!-- ══ RIGHT: Rules & Regulations ══ -->
+  <!-- ══ RIGHT: Rules ══ -->
   <aside class="rules-panel">
     <div class="rules-card">
       <div class="card-header">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Rules and Regulation
+        Rules and Regulations
       </div>
       <div class="rules-body">
         <div class="rules-institution">
@@ -600,15 +779,162 @@
     </div>
   </aside>
 
-</div>
+</div><!-- end page-wrap -->
 
 <script>
-function showTab(name, btn) {
+// ── Tab switching ──────────────────────────────────────────────────────────
+function showTab(name) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.side-menu-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
 }
+
+// ── Notification Panel ─────────────────────────────────────────────────────
+function openNotifPanel() {
+  document.getElementById('notifPanel').classList.add('open');
+  document.getElementById('notifOverlay').classList.add('open');
+}
+function closeNotifPanel() {
+  document.getElementById('notifPanel').classList.remove('open');
+  document.getElementById('notifOverlay').classList.remove('open');
+}
+
+function markRead(id) {
+  const item = document.getElementById('notif-' + id);
+  if (!item || !item.classList.contains('unread')) return;
+  fetch('/student/notifications/read/' + id, { method: 'POST' })
+    .then(() => {
+      item.classList.remove('unread');
+      updateBadgeCount(-1);
+    });
+}
+
+function markAllRead() {
+  fetch('/student/notifications/read_all', { method: 'POST' })
+    .then(() => {
+      document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+      const badge = document.getElementById('notifBadge');
+      badge.style.display = 'none';
+      document.getElementById('unreadLabel').textContent = '0 unread';
+    });
+}
+
+function updateBadgeCount(delta) {
+  const badge = document.getElementById('notifBadge');
+  let current = parseInt(badge.textContent) || 0;
+  current = Math.max(0, current + delta);
+  if (current === 0) {
+    badge.style.display = 'none';
+  } else {
+    badge.style.display = 'flex';
+    badge.textContent = current;
+  }
+  document.getElementById('unreadLabel').textContent = current + ' unread';
+}
+
+// ── PC Grid ────────────────────────────────────────────────────────────────
+let currentLab     = '524';
+let selectedPcNum  = null;
+let reservedPcs    = [];  // pc_numbers that are taken for selected date
+
+function switchLab(btn, lab) {
+  document.querySelectorAll('.lab-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentLab = lab;
+  document.getElementById('selectedLab').value = lab;
+  selectedPcNum = null;
+  document.getElementById('selectedPcNumber').value = '';
+  document.getElementById('selectedPcDisplay').style.display = 'none';
+  loadPcGrid();
+}
+
+function loadPcGrid() {
+  const date = document.getElementById('resDate').value;
+  if (!date) {
+    renderGrid([]);
+    return;
+  }
+  fetch(`/student/reserved_pcs?lab=${currentLab}&date=${date}`)
+    .then(r => r.json())
+    .then(pcs => {
+      reservedPcs = pcs;
+      renderGrid(pcs);
+    })
+    .catch(() => renderGrid([]));
+}
+
+function renderGrid(takenPcs) {
+  const gridA = document.getElementById('pcGridA');
+  const gridB = document.getElementById('pcGridB');
+  const rowA  = Array.from({length:10}, (_,i) => i+1);
+  const rowB  = Array.from({length:10}, (_,i) => i+11);
+  gridA.innerHTML = rowA.map(n => pcHtml(n, takenPcs)).join('');
+  gridB.innerHTML = rowB.map(n => pcHtml(n, takenPcs)).join('');
+  renderStats(takenPcs);
+}
+
+function pcHtml(num, takenPcs) {
+  const label    = 'PC-' + String(num).padStart(2,'0');
+  const isTaken  = takenPcs.includes(String(num));
+  const isSelected = selectedPcNum === num;
+  let cls        = '';
+  let pipCls     = 'green';
+  let iconSvg    = '';
+
+  if (isSelected) {
+    cls    = 'selected';
+    pipCls = 'blue';
+    iconSvg = `<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#2a5298" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+  } else if (isTaken) {
+    cls    = 'reserved';
+    pipCls = 'red';
+    iconSvg = `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`;
+  }
+
+  const onclick = isTaken ? '' : `onclick="selectPc(${num})"`;
+  const title   = isTaken ? `${label} — Reserved` : `${label} — Click to select`;
+
+  return `
+    <div class="pc-unit ${cls}" ${onclick} title="${title}">
+      <div class="pc-box">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <div class="pc-screen">${iconSvg}</div>
+          <div class="pc-stand"></div>
+          <div class="pc-base"></div>
+        </div>
+        <span class="status-pip ${pipCls}"></span>
+      </div>
+      <span class="pc-label">${label}</span>
+    </div>`;
+}
+
+function renderStats(takenPcs) {
+  const total   = 20;
+  const taken   = takenPcs.length;
+  const avail   = total - taken;
+  document.getElementById('pcStats').innerHTML = `
+    <div class="pc-stat"><div class="pc-stat-num green">${avail}</div><div class="pc-stat-lbl">Available</div></div>
+    <div class="pc-stat"><div class="pc-stat-num red">${taken}</div><div class="pc-stat-lbl">Reserved</div></div>
+    <div class="pc-stat"><div class="pc-stat-num" style="color:#2a5298;">${selectedPcNum ? 1 : 0}</div><div class="pc-stat-lbl">Selected</div></div>`;
+}
+
+function selectPc(num) {
+  if (reservedPcs.includes(String(num))) return;
+  selectedPcNum = num;
+  const label   = 'PC-' + String(num).padStart(2,'0');
+  document.getElementById('selectedPcNumber').value = String(num);
+  document.getElementById('selectedPcDisplay').style.display = 'flex';
+  document.getElementById('selectedPcLabel').textContent = `${label} — Lab ${currentLab}`;
+  loadPcGrid();
+}
+
+// Set min date to today
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('resDate').min = today;
+
+// Initial grid render (empty — no date chosen yet)
+renderGrid([]);
+
+// ── Avatar preview ─────────────────────────────────────────────────────────
 function previewAvatar(event) {
   const file = event.target.files[0]; if (!file) return;
   const reader = new FileReader();
@@ -618,7 +944,7 @@ function previewAvatar(event) {
     const editImg = document.getElementById('edit-preview-img'), editSvg = document.getElementById('edit-preview-svg');
     if (editImg) { editImg.src = e.target.result; editImg.style.display = 'block'; } if (editSvg) editSvg.style.display = 'none';
     const formInput = document.getElementById('profile-photo-input');
-    const dt = new DataTransfer(); dt.items.add(file); formInput.files = dt.files;
+    if (formInput) { const dt = new DataTransfer(); dt.items.add(file); formInput.files = dt.files; }
   };
   reader.readAsDataURL(file);
 }
@@ -636,11 +962,13 @@ function previewEditPhoto(event) {
 function removePhoto() {
   document.getElementById('remove-photo-flag').value = '1';
   const img = document.getElementById('edit-preview-img'), svg = document.getElementById('edit-preview-svg');
-  if (img) { img.src = ''; img.style.display = 'none'; } if (svg) svg.style.display = 'block';
+  if (img) { img.src=''; img.style.display='none'; } if (svg) svg.style.display='block';
   const sideImg = document.getElementById('avatar-img'), sideSvg = document.getElementById('avatar-svg');
-  if (sideImg) { sideImg.src = ''; sideImg.style.display = 'none'; } if (sideSvg) sideSvg.style.display = 'block';
+  if (sideImg) { sideImg.src=''; sideImg.style.display='none'; } if (sideSvg) sideSvg.style.display='block';
   document.getElementById('profile-photo-input').value = '';
 }
+
+// ── Auto dismiss flash ─────────────────────────────────────────────────────
 setTimeout(() => {
   document.querySelectorAll('.flash').forEach(el => {
     el.style.transition = 'opacity 0.4s'; el.style.opacity = '0';
