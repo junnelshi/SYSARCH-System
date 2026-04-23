@@ -6,70 +6,175 @@
   <title>Students — CCS Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <style>
+    .page-wrap { max-width: 1300px; margin: 0 auto; padding: 24px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-title  { font-size: 1.2rem; font-weight: 800; color: #1a202c; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; font-size: 0.84rem; font-weight: 600; font-family: 'Inter',sans-serif; cursor: pointer; border: none; text-decoration: none; transition: all .15s; }
+    .btn-primary { background: #2a5298; color: #fff; }
+    .btn-primary:hover { background: #1a3560; }
+    .btn-danger  { background: #fff; color: #e53e3e; border: 1.5px solid #fed7d7; }
+    .btn-danger:hover { background: #fff5f5; }
+    .btn-success { background: #38a169; color: #fff; }
+    .btn-success:hover { background: #276749; }
+    .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+    .btn-gold { background: linear-gradient(90deg,#f59e0b,#d97706); color: #fff; }
+    .btn-gold:hover { background: linear-gradient(90deg,#d97706,#b45309); }
+
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.07); overflow: hidden; }
+    .card-header-bar {
+      padding: 14px 20px; border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .search-input {
+      padding: 8px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-size: 0.85rem; font-family: 'Inter',sans-serif; outline: none; width: 260px;
+    }
+    .search-input:focus { border-color: #2a5298; }
+
+    .students-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .students-table th { background: #f7fafc; padding: 10px 14px; text-align: left; font-size: 0.72rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: .04em; border-bottom: 2px solid #e2e8f0; }
+    .students-table td { padding: 11px 14px; border-bottom: 1px solid #f0f4f8; color: #2d3748; vertical-align: middle; }
+    .students-table tr:last-child td { border-bottom: none; }
+    .students-table tr:hover td { background: #f7fafc; }
+
+    .avatar-cell { display: flex; align-items: center; gap: 10px; }
+    .mini-av {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg,#2a5298,#63b3ed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: #fff; overflow: hidden;
+    }
+    .mini-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .student-name { font-weight: 600; color: #1a202c; }
+    .student-id   { font-size: 0.72rem; color: #718096; }
+
+    .session-bar-wrap { display: flex; align-items: center; gap: 6px; }
+    .session-bar-bg   { width: 60px; background: #e2e8f0; border-radius: 4px; height: 6px; }
+    .session-bar-fill { height: 100%; border-radius: 4px; }
+
+    .pts-badge { display: inline-flex; align-items: center; gap: 3px; background: linear-gradient(90deg,#fef3c7,#fde68a); color: #92400e; font-weight: 700; font-size: 0.78rem; padding: 2px 8px; border-radius: 20px; border: 1px solid #fcd34d; }
+
+    .actions-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .flash-wrap { max-width: 1300px; margin: 16px auto 0; padding: 0 24px; }
+    .flash { display: flex; align-items: center; justify-content: space-between; padding: 11px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; margin-bottom: 8px; }
+    .flash button { background: none; border: none; cursor: pointer; opacity: .5; }
+    .flash-success { background: #c6f6d5; border-left: 4px solid #38a169; color: #22543d; }
+    .flash-error   { background: #fed7d7; border-left: 4px solid #e53e3e; color: #742a2a; }
+
+    /* Modals */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 14px; width: 420px; max-width: 95vw; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    .modal-header { background: linear-gradient(90deg,#2a5298,#3b6fd4); color: #fff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 { font-size: 0.95rem; font-weight: 700; }
+    .modal-header.gold { background: linear-gradient(90deg,#d97706,#f59e0b); }
+    .modal-close { background: rgba(255,255,255,.15); border: none; color: #fff; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+    .modal-body { padding: 20px; }
+    .form-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .form-field label { font-size: 0.72rem; color: #718096; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+    .form-input { width: 100%; padding: 9px 13px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.88rem; font-family: 'Inter',sans-serif; outline: none; transition: border .15s; }
+    .form-input:focus { border-color: #2a5298; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+    .btn-secondary { background: #f7fafc; color: #4a5568; border: 1.5px solid #e2e8f0; }
+    .btn-secondary:hover { background: #edf2f7; }
+
+    .pts-quick { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .pts-quick-btn { padding: 4px 10px; border-radius: 6px; border: 1.5px solid #e2e8f0; background: #f7fafc; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Inter',sans-serif; color: #2a5298; transition: all .15s; }
+    .pts-quick-btn:hover { background: #ebf4ff; border-color: #2a5298; }
+    .pts-quick-btn.neg { color: #e53e3e; }
+    .pts-quick-btn.neg:hover { background: #fff5f5; border-color: #e53e3e; }
+  </style>
 </head>
 <body>
 {% from 'macros.html' import admin_nav %}
+
 {{ admin_nav('students') }}
 
-<div class="admin-page">
-  <div class="page-heading">Students Information</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="flash-stack">
-        {% for category, message in messages %}
-          <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-title">Students ({{ students|length }})</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <a href="{{ url_for('reset_sessions') }}" class="btn btn-danger btn-sm"
+         onclick="return confirm('Reset ALL sessions to 30?')">Reset All Sessions</a>
+      <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Student</button>
+    </div>
+  </div>
 
   <div class="card">
-    <div class="card-header">
-      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-      All Students
+    <div class="card-header-bar">
+      <input type="text" class="search-input" placeholder="Search by name or ID…" oninput="filterTable(this.value)" id="searchBox"/>
+      <span style="font-size:0.78rem;color:#718096;" id="countLabel">{{ students|length }} students</span>
     </div>
-
-    <div style="padding:14px 18px 0;">
-      <div class="action-bar">
-        <button class="btn btn-primary" onclick="document.getElementById('addModal').style.display='flex'">+ Add Student</button>
-        <a href="{{ url_for('reset_sessions') }}" class="btn btn-danger"
-           onclick="return confirm('Reset ALL student sessions to 30?')">↺ Reset All Sessions</a>
-      </div>
-    </div>
-
-    <div class="table-toolbar">
-      <div class="entries-select">Show <select><option>10</option><option>25</option><option>50</option></select> entries</div>
-      <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#4a5568;">
-        Search: <input type="text" id="tableSearch" oninput="searchTable(this.value)" class="table-search-input"/>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table class="data-table" id="studentsTable">
+    <div style="overflow-x:auto;">
+      <table class="students-table" id="studentsTable">
         <thead>
-          <tr><th>ID Number</th><th>Name</th><th>Year Level</th><th>Course</th><th>Remaining Session</th><th>Actions</th></tr>
+          <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Sessions</th>
+            <th>Points</th>
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
           {% for s in students %}
-          <tr>
-            <td><strong>{{ s.idno }}</strong></td>
-            <td>{{ s.firstname }} {{ s.lastname }}</td>
-            <td>{{ s.level }}</td>
-            <td>{{ s.course }}</td>
+          <tr data-name="{{ s.firstname|lower }} {{ s.lastname|lower }}" data-id="{{ s.idno|lower }}">
             <td>
-              {% set sess = s.remaining_session if s.remaining_session is not none else 30 %}
-              <span style="font-weight:700;color:{% if sess <= 5 %}#e53e3e{% elif sess <= 15 %}#d69e2e{% else %}#38a169{% endif %}">{{ sess }}</span>
+              <div class="avatar-cell">
+                <div class="mini-av">
+                  {% if s.profile_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + s.profile_image) }}" alt=""/>
+                  {% else %}
+                    {{ s.firstname[0] }}{{ s.lastname[0] }}
+                  {% endif %}
+                </div>
+                <div>
+                  <div class="student-name">{{ s.lastname }}, {{ s.firstname }}</div>
+                  <div class="student-id">{{ s.idno }}</div>
+                </div>
+              </div>
             </td>
+            <td>{{ s.course }} — Yr {{ s.level }}</td>
             <td>
-              <button class="btn btn-sm btn-primary"
-                onclick="openEdit('{{ s.idno }}','{{ s.lastname }}','{{ s.firstname }}','{{ s.course }}','{{ s.level }}','{{ s.email }}','{{ s.remaining_session if s.remaining_session is not none else 30 }}')">Edit</button>
-              <a href="{{ url_for('delete_student', idno=s.idno) }}"
-                 class="btn btn-sm btn-danger"
-                 onclick="return confirm('Delete student {{ s.firstname }} {{ s.lastname }}?')">Delete</a>
+              <div class="session-bar-wrap">
+                {% set pct = (s.remaining_session / 30 * 100)|int %}
+                <div class="session-bar-bg">
+                  <div class="session-bar-fill" style="width:{{ pct }}%;background:{% if pct>50 %}#38a169{% elif pct>20 %}#d69e2e{% else %}#e53e3e{% endif %};"></div>
+                </div>
+                <span style="font-size:0.78rem;color:#718096;">{{ s.remaining_session }}/30</span>
+              </div>
+            </td>
+            <td><span class="pts-badge">⭐ {{ s.points if s.points else 0 }}</span></td>
+            <td>
+              <div class="actions-cell">
+                <button class="btn btn-primary btn-sm"
+                  onclick="openEditModal('{{ s.idno }}','{{ s.lastname }}','{{ s.firstname }}','{{ s.course }}','{{ s.level }}','{{ s.email }}',{{ s.remaining_session }},{{ s.points if s.points else 0 }})">
+                  Edit
+                </button>
+                <button class="btn btn-gold btn-sm"
+                  onclick="openPointsModal('{{ s.idno }}','{{ s.firstname }} {{ s.lastname }}',{{ s.points if s.points else 0 }})">
+                  ⭐ Points
+                </button>
+                <a href="{{ url_for('delete_student', idno=s.idno) }}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Delete {{ s.firstname }} {{ s.lastname }}?')">Delete</a>
+              </div>
             </td>
           </tr>
           {% else %}
-          <tr><td colspan="6" class="no-data-cell">No students found.</td></tr>
+          <tr><td colspan="5" style="text-align:center;padding:40px;color:#a0aec0;">No students found.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -77,31 +182,40 @@
   </div>
 </div>
 
-<!-- Add Modal -->
-<div id="addModal" class="modal-overlay" style="display:none">
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="addModal">
   <div class="modal">
-    <div class="modal-header"><span>Add New Student</span><button onclick="document.getElementById('addModal').style.display='none'">✕</button></div>
+    <div class="modal-header">
+      <h3>Add New Student</h3>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
     <div class="modal-body">
       <form action="{{ url_for('add_student') }}" method="POST">
-        <div class="form-group"><label>ID Number</label><input type="text" name="idno" class="modal-input" required/></div>
-        <div class="form-group"><label>Last Name</label><input type="text" name="lastname" class="modal-input" required/></div>
-        <div class="form-group"><label>First Name</label><input type="text" name="firstname" class="modal-input" required/></div>
-        <div class="form-group">
-          <label>Course</label>
-          <select name="course" class="modal-input" required>
-            <option value="BSIT">BSIT</option><option value="BSCS">BSCS</option><option value="BSIS">BSIS</option><option value="ACT">ACT</option>
-          </select>
+        <div class="form-field"><label>ID Number</label><input name="idno" class="form-input" required/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-field"><label>Last Name</label><input name="lastname" class="form-input" required/></div>
+          <div class="form-field"><label>First Name</label><input name="firstname" class="form-input" required/></div>
         </div>
-        <div class="form-group">
-          <label>Year Level</label>
-          <select name="level" class="modal-input" required>
-            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-          </select>
+        <div class="form-field"><label>Email</label><input type="email" name="email" class="form-input" required/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-field">
+            <label>Course</label>
+            <select name="course" class="form-input" required>
+              <option value="">-- Select --</option>
+              {% for c in ['BSIT','BSCS','BSIS','ACT'] %}<option>{{ c }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Year Level</label>
+            <select name="level" class="form-input" required>
+              <option value="">-- Select --</option>
+              {% for y in [1,2,3,4] %}<option>{{ y }}</option>{% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="form-group"><label>Email</label><input type="email" name="email" class="modal-input" required/></div>
-        <p class="hint">Default password will be: student123</p>
+        <div style="font-size:0.75rem;color:#718096;margin-bottom:14px;">Default password: <strong>student123</strong></div>
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="document.getElementById('addModal').style.display='none'">Cancel</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">Cancel</button>
           <button type="submit" class="btn btn-primary">Add Student</button>
         </div>
       </form>
@@ -109,30 +223,40 @@
   </div>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" class="modal-overlay" style="display:none">
+<!-- Edit Student Modal -->
+<div class="modal-overlay" id="editModal">
   <div class="modal">
-    <div class="modal-header"><span>Edit Student</span><button onclick="document.getElementById('editModal').style.display='none'">✕</button></div>
+    <div class="modal-header">
+      <h3>Edit Student</h3>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
     <div class="modal-body">
       <form id="editForm" method="POST">
-        <div class="form-group"><label>Last Name</label><input type="text" name="lastname" id="editLastname" class="modal-input" required/></div>
-        <div class="form-group"><label>First Name</label><input type="text" name="firstname" id="editFirstname" class="modal-input" required/></div>
-        <div class="form-group">
-          <label>Course</label>
-          <select name="course" id="editCourse" class="modal-input">
-            <option value="BSIT">BSIT</option><option value="BSCS">BSCS</option><option value="BSIS">BSIS</option><option value="ACT">ACT</option>
-          </select>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-field"><label>Last Name</label><input name="lastname" id="edit_lastname" class="form-input" required/></div>
+          <div class="form-field"><label>First Name</label><input name="firstname" id="edit_firstname" class="form-input" required/></div>
         </div>
-        <div class="form-group">
-          <label>Year Level</label>
-          <select name="level" id="editLevel" class="modal-input">
-            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-          </select>
+        <div class="form-field"><label>Email</label><input type="email" name="email" id="edit_email" class="form-input" required/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-field">
+            <label>Course</label>
+            <select name="course" id="edit_course" class="form-input" required>
+              {% for c in ['BSIT','BSCS','BSIS','ACT'] %}<option>{{ c }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Year Level</label>
+            <select name="level" id="edit_level" class="form-input" required>
+              {% for y in [1,2,3,4] %}<option>{{ y }}</option>{% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="form-group"><label>Email</label><input type="email" name="email" id="editEmail" class="modal-input" required/></div>
-        <div class="form-group"><label>Remaining Sessions</label><input type="number" name="remaining_session" id="editSession" class="modal-input" min="0" max="30" required/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-field"><label>Remaining Sessions</label><input type="number" name="remaining_session" id="edit_sessions" class="form-input" min="0" max="30" required/></div>
+          <div class="form-field"><label>Points</label><input type="number" name="points" id="edit_points" class="form-input" min="0" required/></div>
+        </div>
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Cancel</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
       </form>
@@ -140,26 +264,90 @@
   </div>
 </div>
 
+<!-- Add/Deduct Points Modal -->
+<div class="modal-overlay" id="pointsModal">
+  <div class="modal">
+    <div class="modal-header gold">
+      <h3 id="pointsModalTitle">Award Points</h3>
+      <button class="modal-close" onclick="closeModal('pointsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="pointsForm" method="POST">
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.83rem;color:#92400e;">
+          Current points: <strong id="currentPtsDisplay">0</strong>
+        </div>
+        <div class="form-field">
+          <label>Points to add (+) or deduct (−)</label>
+          <input type="number" name="points" id="ptsInput" class="form-input" placeholder="e.g. 10 or -5" required/>
+          <div class="pts-quick">
+            <button type="button" class="pts-quick-btn" onclick="setPoints(5)">+5</button>
+            <button type="button" class="pts-quick-btn" onclick="setPoints(10)">+10</button>
+            <button type="button" class="pts-quick-btn" onclick="setPoints(20)">+20</button>
+            <button type="button" class="pts-quick-btn" onclick="setPoints(50)">+50</button>
+            <button type="button" class="pts-quick-btn neg" onclick="setPoints(-5)">−5</button>
+            <button type="button" class="pts-quick-btn neg" onclick="setPoints(-10)">−10</button>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Reason</label>
+          <input type="text" name="reason" class="form-input" placeholder="e.g. Perfect attendance, Lab competition…"/>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('pointsModal')">Cancel</button>
+          <button type="submit" class="btn btn-gold">Apply Points</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
-function openEdit(idno, lastname, firstname, course, level, email, session) {
-  document.getElementById('editForm').action = '/admin/students/edit/' + idno;
-  document.getElementById('editLastname').value  = lastname;
-  document.getElementById('editFirstname').value = firstname;
-  document.getElementById('editCourse').value    = course;
-  document.getElementById('editLevel').value     = level;
-  document.getElementById('editEmail').value     = email;
-  document.getElementById('editSession').value   = session;
-  document.getElementById('editModal').style.display = 'flex';
-}
-function searchTable(q) {
-  document.querySelectorAll('#studentsTable tbody tr').forEach(r=>{
-    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
-  });
-}
-['addModal','editModal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id) document.getElementById(id).style.display='none'; });
+function openAddModal()   { document.getElementById('addModal').classList.add('open'); }
+function closeModal(id)   { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
-setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); }, 5000);
+
+function openEditModal(idno, ln, fn, course, level, email, sessions, points) {
+  document.getElementById('editForm').action = '/admin/students/edit/' + idno;
+  document.getElementById('edit_lastname').value  = ln;
+  document.getElementById('edit_firstname').value = fn;
+  document.getElementById('edit_email').value     = email;
+  document.getElementById('edit_course').value    = course;
+  document.getElementById('edit_level').value     = level;
+  document.getElementById('edit_sessions').value  = sessions;
+  document.getElementById('edit_points').value    = points;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function openPointsModal(idno, name, currentPts) {
+  document.getElementById('pointsForm').action = '/admin/students/add_points/' + idno;
+  document.getElementById('pointsModalTitle').textContent = 'Award Points — ' + name;
+  document.getElementById('currentPtsDisplay').textContent = currentPts;
+  document.getElementById('ptsInput').value = '';
+  document.getElementById('pointsModal').classList.add('open');
+}
+
+function setPoints(val) {
+  document.getElementById('ptsInput').value = val;
+}
+
+function filterTable(q) {
+  const rows = document.querySelectorAll('#studentsTable tbody tr');
+  let visible = 0;
+  rows.forEach(r => {
+    const name = r.dataset.name || '';
+    const id   = r.dataset.id   || '';
+    const show = name.includes(q.toLowerCase()) || id.includes(q.toLowerCase());
+    r.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('countLabel').textContent = visible + ' students';
+}
+
+setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); },5000);
 </script>
+
 </body>
 </html>

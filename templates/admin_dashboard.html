@@ -5,25 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard — CCS Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <style>
+    .leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
+    .lb-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 10px;
+      border: 1px solid #e2e8f0; background: #f7fafc;
+      transition: background .15s; text-decoration: none;
+    }
+    .lb-row:hover { background: #eff6ff; border-color: #bfdbfe; }
+    .lb-rank { font-size: 1rem; font-weight: 800; min-width: 28px; text-align: center; }
+    .lb-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg,#2a5298,#63b3ed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: #fff;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .lb-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .lb-info { flex: 1; min-width: 0; }
+    .lb-name    { font-size: 0.84rem; font-weight: 700; color: #1a202c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-course  { font-size: 0.72rem; color: #718096; }
+    .lb-pts     { font-size: 0.82rem; font-weight: 800; color: #d97706; white-space: nowrap; }
+    .view-all-btn {
+      display: block; width: 100%; margin-top: 10px; padding: 9px;
+      background: #f7fafc; border: 1.5px solid #e2e8f0; border-radius: 9px;
+      font-size: 0.82rem; font-weight: 700; color: #2a5298;
+      font-family: 'Inter',sans-serif; cursor: pointer; text-align: center;
+      text-decoration: none; transition: all .15s;
+    }
+    .view-all-btn:hover { background: #eff6ff; border-color: #2a5298; }
+    .no-lb { text-align: center; padding: 24px 0; color: #a0aec0; font-size: 0.84rem; }
+  </style>
 </head>
 <body>
+{% from 'macros.html' import admin_nav %}
 
 <!-- ── Navbar ── -->
-<nav class="admin-navbar">
-  <span class="navbar-brand">College of Computer Studies Admin</span>
-  <div class="navbar-menu">
-    <a href="{{ url_for('dashboard') }}"           class="nav-link active">Home</a>
-    <a href="#" onclick="openSearch();return false" class="nav-link">Search</a>
-    <a href="{{ url_for('students_list') }}"        class="nav-link">Students</a>
-    <a href="#" onclick="openSitin();return false"  class="nav-link">Sit-in</a>
-    <a href="{{ url_for('sitin_records') }}"        class="nav-link">Sit-in Records</a>
-    <a href="{{ url_for('feedback_reports') }}"     class="nav-link">Feedback Reports</a>
-    <a href="{{ url_for('admin_reservations') }}"   class="nav-link">Reservation</a>
-    <a href="{{ url_for('logout') }}"               class="nav-logout">Log out</a>
-  </div>
-</nav>
+{{ admin_nav('home') }}
 
 <div class="admin-page">
 
@@ -69,35 +89,10 @@
     </div>
   </div>
 
-  <!-- Main grid -->
-  <div class="dashboard-grid">
+  <!-- Main layout: Announcement half | Lab Activity | Leaderboard — 3 columns -->
+  <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:20px;align-items:start;">
 
-    <!-- Statistics card -->
-    <div class="card">
-      <div class="card-header">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        Statistics
-      </div>
-      <div class="card-body">
-        {% if stats.purpose_counts %}
-          <div class="chart-wrap">
-            <canvas id="purposeChart"></canvas>
-          </div>
-          <div style="margin-top:12px;">
-            {% for p in stats.purpose_counts %}
-              <div class="stat-item">
-                <span class="stat-label">{{ p.purpose }}</span>
-                <span class="stat-value">{{ p.cnt }}</span>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="no-data">No sit-in data yet. Log a student in to see statistics.</p>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Announcement card -->
+    <!-- ── LEFT: Announcement card (big) ── -->
     <div class="card">
       <div class="card-header">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
@@ -105,11 +100,10 @@
       </div>
       <div class="card-body">
         <form action="{{ url_for('add_announcement_route') }}" method="POST">
-          <textarea name="content" class="ann-textarea" placeholder="Write a new announcement…" rows="3" required></textarea>
-          <button type="submit" class="btn btn-success" style="width:100%;">Post Announcement</button>
+          <textarea name="content" class="ann-textarea" placeholder="Write a new announcement…" rows="4" required></textarea>
+          <button type="submit" class="btn btn-success" style="padding:8px 22px;margin-top:10px;">Post Announcement</button>
         </form>
-
-        <div class="ann-list" style="margin-top:16px;">
+        <div class="ann-list" style="margin-top:18px;">
           <div class="ann-list-title">Posted Announcements</div>
           {% for ann in announcements %}
             <div class="ann-item">
@@ -129,16 +123,109 @@
       </div>
     </div>
 
-  </div>
-</div>
+
+    <!-- Lab Activity card -->
+      <div class="card">
+        <div class="card-header">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Lab Activity Summary
+        </div>
+        <div class="card-body" style="padding:0;">
+          <!-- Quick stat strip -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #f0f4f8;">
+            <div style="padding:12px 16px;border-right:1px solid #f0f4f8;">
+              <div style="font-size:1.5rem;font-weight:800;color:#2a5298;">{{ stats.total_sitins }}</div>
+              <div style="font-size:0.68rem;color:#718096;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Total Sessions</div>
+            </div>
+            <div style="padding:12px 16px;">
+              <div style="font-size:1.5rem;font-weight:800;color:#38a169;">{{ stats.currently_in }}</div>
+              <div style="font-size:0.68rem;color:#718096;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Active Now</div>
+            </div>
+          </div>
+          {% if stats.lab_counts %}
+          <div style="padding:12px 16px 6px;">
+            <div style="font-size:0.68rem;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Lab Usage</div>
+            {% set max_lab = stats.lab_counts[0].cnt if stats.lab_counts else 1 %}
+            {% for l in stats.lab_counts %}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+              <span style="font-size:0.75rem;font-weight:700;color:#2a5298;min-width:38px;">Lab {{ l.lab }}</span>
+              <div style="flex:1;background:#e2e8f0;border-radius:4px;height:7px;overflow:hidden;">
+                <div style="width:{{ (l.cnt / max_lab * 100)|int }}%;height:100%;background:linear-gradient(90deg,#2a5298,#3b6fd4);border-radius:4px;"></div>
+              </div>
+              <span style="font-size:0.72rem;color:#718096;min-width:18px;text-align:right;">{{ l.cnt }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% if stats.purpose_counts %}
+          <div style="padding:6px 16px 12px;border-top:1px solid #f0f4f8;margin-top:4px;">
+            <div style="font-size:0.68rem;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Top Purposes</div>
+            {% set max_p = stats.purpose_counts[0].cnt if stats.purpose_counts else 1 %}
+            {% for p in stats.purpose_counts[:4] %}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+              <span style="font-size:0.75rem;font-weight:600;color:#4a5568;min-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ p.purpose }}">{{ p.purpose }}</span>
+              <div style="flex:1;background:#e2e8f0;border-radius:4px;height:7px;overflow:hidden;">
+                <div style="width:{{ (p.cnt / max_p * 100)|int }}%;height:100%;background:linear-gradient(90deg,#38a169,#48bb78);border-radius:4px;"></div>
+              </div>
+              <span style="font-size:0.72rem;color:#718096;min-width:18px;text-align:right;">{{ p.cnt }}</span>
+            </div>
+            {% endfor %}
+            <a href="{{ url_for('sitin_reports') }}" style="display:block;text-align:center;margin-top:8px;font-size:0.75rem;color:#2a5298;font-weight:600;text-decoration:none;">View Full Analytics →</a>
+          </div>
+          {% else %}
+            <p class="no-data" style="padding:18px;">No sit-in data yet.</p>
+          {% endif %}
+        </div>
+      </div>
+
+    <!-- Top Students / Leaderboard card -->
+      <div class="card">
+        <div class="card-header">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          Top Students
+        </div>
+        <div class="card-body" style="padding:10px 14px 14px;">
+          {% if leaderboard %}
+            <div class="leaderboard-list">
+              {% for s in leaderboard[:5] %}
+              <div class="lb-row">
+                <span class="lb-rank">
+                  {% if loop.index == 1 %}🥇
+                  {% elif loop.index == 2 %}🥈
+                  {% elif loop.index == 3 %}🥉
+                  {% else %}{{ loop.index }}{% endif %}
+                </span>
+                <div class="lb-avatar">
+                  {% if s.profile_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + s.profile_image) }}" alt=""/>
+                  {% else %}
+                    {{ s.firstname[0] }}{{ s.lastname[0] }}
+                  {% endif %}
+                </div>
+                <div class="lb-info">
+                  <div class="lb-name">{{ s.firstname }} {{ s.lastname }}</div>
+                  <div class="lb-course">{{ s.course }} · {{ s.idno }}</div>
+                </div>
+                <div class="lb-pts">⭐ {{ s.points }}</div>
+              </div>
+              {% endfor %}
+            </div>
+            <a href="{{ url_for('admin_leaderboard') }}" class="view-all-btn">View Full Leaderboard →</a>
+          {% else %}
+            <div class="no-lb">No points earned yet.<br>Points are awarded automatically.</div>
+            <a href="{{ url_for('admin_leaderboard') }}" class="view-all-btn">View Leaderboard →</a>
+          {% endif %}
+        </div>
+      </div>
+
+
+  </div><!-- end main grid -->
+</div><!-- end admin-page -->
 
 <!-- ── Search Modal ── -->
 <div id="searchModal" class="modal-overlay" style="display:none">
   <div class="modal">
-    <div class="modal-header">
-      <span>Search Student</span>
-      <button onclick="closeSearch()">✕</button>
-    </div>
+    <div class="modal-header"><span>Search Student</span><button onclick="closeSearch()">✕</button></div>
     <div class="modal-body">
       <div class="form-group">
         <label>Search by ID or Name</label>
@@ -152,20 +239,11 @@
 <!-- ── Sit-in Modal ── -->
 <div id="sitinModal" class="modal-overlay" style="display:none">
   <div class="modal">
-    <div class="modal-header">
-      <span>Sit In Form</span>
-      <button onclick="closeSitin()">✕</button>
-    </div>
+    <div class="modal-header"><span>Sit In Form</span><button onclick="closeSitin()">✕</button></div>
     <div class="modal-body">
       <form action="{{ url_for('admin_sitin') }}" method="POST">
-        <div class="form-group">
-          <label>ID Number</label>
-          <input type="text" name="idno" id="sitinIdno" class="modal-input" required/>
-        </div>
-        <div class="form-group">
-          <label>Student Name</label>
-          <input type="text" id="sitinName" class="modal-input" readonly/>
-        </div>
+        <div class="form-group"><label>ID Number</label><input type="text" name="idno" id="sitinIdno" class="modal-input" required/></div>
+        <div class="form-group"><label>Student Name</label><input type="text" id="sitinName" class="modal-input" readonly/></div>
         <div class="form-group">
           <label>Purpose</label>
           <select name="purpose" class="modal-input" required>
@@ -182,10 +260,7 @@
             <option>524</option><option>526</option><option>528</option><option>530</option><option>542</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Remaining Session</label>
-          <input type="text" id="sitinSession" class="modal-input" readonly/>
-        </div>
+        <div class="form-group"><label>Remaining Session</label><input type="text" id="sitinSession" class="modal-input" readonly/></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeSitin()">Close</button>
           <button type="submit" class="btn btn-primary">Sit In</button>
@@ -196,23 +271,6 @@
 </div>
 
 <script>
-// Chart
-const purposeData = {{ stats.purpose_counts | tojson }};
-if (purposeData.length > 0) {
-  new Chart(document.getElementById('purposeChart').getContext('2d'), {
-    type: 'pie',
-    data: {
-      labels: purposeData.map(p => p.purpose),
-      datasets: [{ data: purposeData.map(p => p.cnt),
-        backgroundColor: ['#2a5298','#e53e3e','#38a169','#d69e2e','#805ad5','#e8a020','#3182ce','#dd6b20'],
-        borderWidth: 2, borderColor: '#fff' }]
-    },
-    options: { responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { position: 'bottom', labels: { padding: 16, font: { size: 11 } } } } }
-  });
-}
-
-// Search
 function openSearch() { document.getElementById('searchModal').style.display='flex'; setTimeout(()=>document.getElementById('searchInput').focus(),100); }
 function closeSearch() { document.getElementById('searchModal').style.display='none'; document.getElementById('searchResults').innerHTML=''; document.getElementById('searchInput').value=''; }
 
@@ -234,7 +292,6 @@ function doSearch(q) {
     });
 }
 
-// Select student from search → close search → open sit-in form
 function selectStudent(idno, name, sessions) {
   closeSearch();
   document.getElementById('sitinIdno').value    = idno;
@@ -243,16 +300,13 @@ function selectStudent(idno, name, sessions) {
   openSitin();
 }
 
-// Sit-in modal
 function openSitin() { document.getElementById('sitinModal').style.display='flex'; }
 function closeSitin() { document.getElementById('sitinModal').style.display='none'; }
 
-// Close modals on backdrop click
 ['searchModal','sitinModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id) document.getElementById(id).style.display='none'; });
 });
 
-// Auto-dismiss flash
 setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); }, 5000);
 </script>
 </body>

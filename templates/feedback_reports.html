@@ -37,8 +37,8 @@
             <td><strong>{{ f.idno }}</strong></td>
             <td>{{ f.firstname }} {{ f.lastname }}</td>
             <td>
-              <span class="rating-stars">
-                {% for i in range(f.rating) %}★{% endfor %}{% for i in range(5 - f.rating) %}<span style="color:#e2e8f0;">★</span>{% endfor %}
+              <span style="color:#d69e2e;">
+                {% for i in range(f.rating) %}★{% endfor %}<span style="color:#e2e8f0;">{% for i in range(5 - f.rating) %}★{% endfor %}</span>
               </span>
               <span style="font-size:0.75rem;color:#718096;margin-left:4px;">({{ f.rating }}/5)</span>
             </td>

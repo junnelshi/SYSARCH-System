@@ -35,6 +35,7 @@ from dbhelper import (
     add_notification,
     mark_notification_read,
     mark_all_notifications_read,
+    delete_notifications_by_content,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -170,8 +171,10 @@ def dashboard():
     announcements = get_all_announcements()
     reservations  = get_student_reservations(session['student_id'])
     sitin_history = get_student_sitin_history(session['student_id'])
-    notifications = get_student_notifications(session['student_id'])
+    notifications_raw = get_student_notifications(session['student_id'])
     unread_count  = get_unread_count(session['student_id'])
+    # Convert sqlite3.Row objects → plain dicts so tojson works in the template
+    notifications = [dict(n) for n in notifications_raw]
     return render_template('student_profile.html',
                            student=student,
                            announcements=announcements,
@@ -205,7 +208,13 @@ def add_announcement_route():
 def delete_announcement_route(ann_id):
     r = admin_required()
     if r: return r
+    from dbhelper import getone, delete_notifications_by_content
+    ann = getone('announcements', id=ann_id)
     delete_announcement(ann_id)
+    if ann:
+        # Delete matching student notifications so they disappear from the panel
+        preview = ann['content'][:120] + ('\u2026' if len(ann['content']) > 120 else '')
+        delete_notifications_by_content(preview)
     return redirect(url_for('dashboard'))
 
 # ── Admin: Search student (AJAX) ──────────────────────────────────────────────

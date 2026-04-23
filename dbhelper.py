@@ -641,3 +641,23 @@ def mark_all_notifications_read(idno):
         return False
     finally:
         conn.close()
+
+
+def delete_notifications_by_content(message_text):
+    """Delete all notifications whose message matches the given text.
+    Used when an announcement is deleted — removes it from all student panels."""
+    conn = connect()
+    cur  = conn.cursor()
+    try:
+        cur.execute(
+            "DELETE FROM notifications WHERE message = ? AND title = 'New Announcement'",
+            (message_text,)
+        )
+        conn.commit()
+        return cur.rowcount
+    except Exception as e:
+        print("delete_notifications_by_content error:", e)
+        conn.rollback()
+        return 0
+    finally:
+        conn.close()

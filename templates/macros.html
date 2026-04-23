@@ -5,10 +5,13 @@
     <a href="{{ url_for('dashboard') }}"           class="nav-link {{ 'active' if active=='home' }}">Home</a>
     <a href="#" onclick="openSearch();return false" class="nav-link {{ 'active' if active=='search' }}">Search</a>
     <a href="{{ url_for('students_list') }}"        class="nav-link {{ 'active' if active=='students' }}">Students</a>
-    <a href="{{ url_for('current_sitin') }}"        class="nav-link {{ 'active' if active=='sitin' or active=='current' }}">Sit-in</a>
+    <a href="#" onclick="openSitin();return false"  class="nav-link {{ 'active' if active=='sitin' }}">Sit-in</a>
+    <a href="{{ url_for('current_sitin') }}"        class="nav-link {{ 'active' if active=='current' }}">Current Sit-in</a>
     <a href="{{ url_for('sitin_records') }}"        class="nav-link {{ 'active' if active=='records' }}">Sit-in Records</a>
-    <a href="{{ url_for('feedback_reports') }}"     class="nav-link {{ 'active' if active=='feedback' }}">Feedback Reports</a>
-    <a href="{{ url_for('admin_reservations') }}"   class="nav-link {{ 'active' if active=='reservation' }}">Reservation</a>
+    <a href="{{ url_for('sitin_reports') }}"        class="nav-link {{ 'active' if active=='analytics' }}">Analytics</a>
+    <a href="{{ url_for('feedback_reports') }}"     class="nav-link {{ 'active' if active=='feedback' }}">Feedback</a>
+    <a href="{{ url_for('admin_reservations') }}"   class="nav-link {{ 'active' if active=='reservation' }}">Reservations</a>
+    <a href="{{ url_for('admin_leaderboard') }}"    class="nav-link {{ 'active' if active=='leaderboard' }}">Leaderboard</a>
     <a href="{{ url_for('logout') }}"               class="nav-logout">Log out</a>
   </div>
 </nav>

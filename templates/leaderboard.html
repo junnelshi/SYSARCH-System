@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leaderboard — CCS Sit-in System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+    .navbar {
+      background: linear-gradient(90deg, #1a3560, #2a5298);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 36px; height: 56px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .navbar-brand { color: #fff; font-size: 1rem; font-weight: 700; }
+    .navbar-links { display: flex; gap: 6px; align-items: center; }
+    .nav-btn {
+      color: rgba(255,255,255,0.9); padding: 6px 18px; border-radius: 5px;
+      font-size: 0.88rem; font-weight: 500; text-decoration: none;
+      border: 1px solid transparent; transition: all 0.15s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .nav-btn.logout { background: #e8a020; border-color: #e8a020; color: #fff; }
+    .nav-btn.logout:hover { background: #c98a18; }
+
+    .page-wrap { max-width: 900px; margin: 30px auto; padding: 0 24px; }
+
+    .page-title {
+      font-size: 1.6rem; font-weight: 800; color: #1a202c; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .page-sub { font-size: 0.88rem; color: #718096; margin-bottom: 28px; }
+
+    /* Table */
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.08); overflow: hidden; }
+    .card-header {
+      background: linear-gradient(90deg, #2a5298, #3b6fd4);
+      color: #fff; padding: 14px 20px; font-size: 0.92rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .lb-table { width: 100%; border-collapse: collapse; }
+    .lb-table th {
+      background: #f7fafc; padding: 10px 18px; text-align: left;
+      font-size: 0.72rem; font-weight: 700; color: #718096;
+      text-transform: uppercase; letter-spacing: .04em;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .lb-table td { padding: 12px 18px; border-bottom: 1px solid #f0f4f8; font-size: 0.88rem; color: #2d3748; }
+    .lb-table tr:last-child td { border-bottom: none; }
+    .lb-table tr:hover td { background: #f7fafc; }
+    .lb-table tr.me td { background: #eff6ff; }
+
+    .rank-num { font-weight: 800; color: #718096; font-size: 0.85rem; }
+    .rank-num.top1 { color: #d97706; }
+    .rank-num.top2 { color: #64748b; }
+    .rank-num.top3 { color: #92400e; }
+
+    .student-name-cell { display: flex; align-items: center; gap: 10px; }
+    .mini-avatar {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #2a5298, #63b3ed);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700; color: #fff; overflow: hidden;
+    }
+    .mini-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .student-full-name { font-weight: 600; color: #1a202c; }
+    .student-course { font-size: 0.75rem; color: #718096; }
+
+    .pts-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: linear-gradient(90deg,#fef3c7,#fde68a);
+      color: #92400e; font-weight: 800; font-size: 0.82rem;
+      padding: 3px 10px; border-radius: 20px;
+      border: 1px solid #fcd34d;
+    }
+
+    .sessions-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .sessions-bar-bg { flex: 1; background: #e2e8f0; border-radius: 4px; height: 6px; max-width: 80px; }
+    .sessions-bar-fill { height: 100%; border-radius: 4px; background: #38a169; }
+
+    .me-tag {
+      display: inline-block; background: #dbeafe; color: #1d4ed8;
+      font-size: 0.65rem; font-weight: 700; padding: 1px 6px;
+      border-radius: 4px; margin-left: 6px; letter-spacing: .04em;
+    }
+
+    .empty { text-align: center; padding: 40px; color: #a0aec0; font-size: 0.9rem; }
+
+    .flash-wrap { max-width: 900px; margin: 16px auto 0; padding: 0 24px; }
+    .flash { display: flex; align-items: center; justify-content: space-between; padding: 11px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; margin-bottom: 8px; }
+    .flash button { background: none; border: none; cursor: pointer; opacity: .5; }
+    .flash-info { background: #bee3f8; border-left: 4px solid #3182ce; color: #1a365d; }
+  </style>
+</head>
+<body>
+{% from 'macros.html' import admin_nav %}
+
+<nav class="navbar">
+  <span class="navbar-brand">
+    {% if session.get('role') == 'admin' %}CCS Admin — Leaderboard
+    {% else %}CCS Sit-in — Leaderboard{% endif %}
+  </span>
+  <div class="navbar-links">
+    <a href="{{ url_for('dashboard') }}" class="nav-btn">← Dashboard</a>
+    <a href="{{ url_for('logout') }}" class="nav-btn logout">Log out</a>
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="page-wrap">
+  <div class="page-title">🏆 Leaderboard</div>
+  <div class="page-sub">Top students ranked by points earned through sit-ins, reservations, and feedback.</div>
+
+  <!-- Full rankings table -->
+  <div class="card">
+    <div class="card-header">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Full Rankings
+    </div>
+    {% if leaderboard %}
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Course</th>
+          <th>Points</th>
+          <th>Sessions Left</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in leaderboard %}
+        {% set is_me = (session.get('role') == 'student' and session.get('student_id') == s.idno) %}
+        <tr {% if is_me %}class="me"{% endif %}>
+          <td>
+            <span class="rank-num {% if loop.index==1 %}top1{% elif loop.index==2 %}top2{% elif loop.index==3 %}top3{% endif %}">
+              {% if loop.index == 1 %}🥇
+              {% elif loop.index == 2 %}🥈
+              {% elif loop.index == 3 %}🥉
+              {% else %}{{ loop.index }}{% endif %}
+            </span>
+          </td>
+          <td>
+            <div class="student-name-cell">
+              <div class="mini-avatar">
+                {% if s.profile_image %}
+                  <img src="{{ url_for('static', filename='uploads/' + s.profile_image) }}" alt=""/>
+                {% else %}
+                  {{ s.firstname[0] }}{{ s.lastname[0] }}
+                {% endif %}
+              </div>
+              <div>
+                <div class="student-full-name">
+                  {{ s.lastname }}, {{ s.firstname }}
+                  {% if is_me %}<span class="me-tag">YOU</span>{% endif %}
+                </div>
+                <div class="student-course">{{ s.idno }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ s.course }} — Yr {{ s.level }}</td>
+          <td><span class="pts-badge">⭐ {{ s.points }}</span></td>
+          <td>
+            <div class="sessions-bar-wrap">
+              {% set pct = (s.remaining_session / 30 * 100)|int %}
+              <div class="sessions-bar-bg">
+                <div class="sessions-bar-fill" style="width:{{ pct }}%; background:{% if pct > 50 %}#38a169{% elif pct > 20 %}#d69e2e{% else %}#e53e3e{% endif %};"></div>
+              </div>
+              <span style="font-size:0.78rem;color:#718096;">{{ s.remaining_session }}</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty">No students yet. Points are awarded for sit-ins, approved reservations, and feedback.</div>
+    {% endif %}
+  </div>
+
+  <div style="margin-top:14px;font-size:0.78rem;color:#a0aec0;text-align:center;">
+    Points are awarded automatically: +5 for approved reservation · +2 for feedback · +1 per sit-in session
+  </div>
+</div>
+
+<script>
+setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); },5000);
+</script>
+
+</body>
+</html>
