@@ -403,8 +403,9 @@ def admin_leaderboard():
 def sitin_records():
     r = admin_required()
     if r: return r
-    records = get_sitin_records()
-    return render_template('sitin_records.html', records=records)
+    records  = get_sitin_records()
+    students = get_all_students()
+    return render_template('sitin_records.html', records=records, students=students)
 
 # ── Admin: Sit-in reports ─────────────────────────────────────────────────────
 
@@ -610,7 +611,7 @@ def reserved_pcs():
     if not lab or not date:
         return jsonify([])
     pcs = get_reserved_pcs(lab, date)
-    return jsonify(pcs)
+    return jsonify([str(p) for p in pcs])
 
 
 if __name__ == '__main__':

@@ -159,8 +159,8 @@
             </td>
             <td><strong>Lab {{ r.lab }}</strong></td>
             <td>
-              {% if r.pc_number %}
-                <span class="pc-chip">🖥 PC-{{ '%02d'|format(r.pc_number|int) }}</span>
+              {% if r.pc_number and r.pc_number != '' and r.pc_number != None %}
+                <span class="pc-chip">🖥 PC-{{ '%02d'|format(r.pc_number|string|int) }}</span>
               {% else %}
                 <span style="color:#a0aec0;font-size:0.78rem;">—</span>
               {% endif %}

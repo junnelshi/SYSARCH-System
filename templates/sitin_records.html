@@ -28,7 +28,7 @@
     <div class="table-wrap">
       <table class="data-table" id="recordsTable">
         <thead>
-          <tr><th>#</th><th>ID Number</th><th>Name</th><th>Course</th><th>Purpose</th><th>Lab</th><th>Login Time</th><th>Logout Time</th></tr>
+          <tr><th>#</th><th>ID Number</th><th>Name</th><th>Course</th><th>Purpose</th><th>Lab</th><th>Remaining Sessions</th><th>Login Time</th><th>Logout Time</th></tr>
         </thead>
         <tbody>
           {% for r in records %}
@@ -39,11 +39,25 @@
             <td>{{ r.course }}</td>
             <td>{{ r.purpose }}</td>
             <td>{{ r.lab }}</td>
+            <td>
+              {% set student = namespace(sess=None) %}
+              {% for s in students if s.idno == r.idno %}
+                {% set student.sess = s.remaining_session %}
+              {% endfor %}
+              {% if student.sess is not none %}
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <div style="width:50px;background:#e2e8f0;border-radius:4px;height:6px;overflow:hidden;">
+                    <div style="width:{{ (student.sess/30*100)|int }}%;height:100%;background:{% if student.sess > 15 %}#38a169{% elif student.sess > 5 %}#d69e2e{% else %}#e53e3e{% endif %};border-radius:4px;"></div>
+                  </div>
+                  <span style="font-size:0.78rem;color:#4a5568;font-weight:600;">{{ student.sess }}/30</span>
+                </div>
+              {% else %}—{% endif %}
+            </td>
             <td style="color:#718096;font-size:0.78rem;">{{ r.login_time }}</td>
             <td style="color:#718096;font-size:0.78rem;">{{ r.logout_time }}</td>
           </tr>
           {% else %}
-          <tr><td colspan="8" class="no-data-cell">No records found.</td></tr>
+          <tr><td colspan="9" class="no-data-cell">No records found.</td></tr>
           {% endfor %}
         </tbody>
       </table>

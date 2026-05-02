@@ -5,7 +5,6 @@
     <a href="{{ url_for('dashboard') }}"           class="nav-link {{ 'active' if active=='home' }}">Home</a>
     <a href="#" onclick="openSearch();return false" class="nav-link {{ 'active' if active=='search' }}">Search</a>
     <a href="{{ url_for('students_list') }}"        class="nav-link {{ 'active' if active=='students' }}">Students</a>
-    <a href="#" onclick="openSitin();return false"  class="nav-link {{ 'active' if active=='sitin' }}">Sit-in</a>
     <a href="{{ url_for('current_sitin') }}"        class="nav-link {{ 'active' if active=='current' }}">Current Sit-in</a>
     <a href="{{ url_for('sitin_records') }}"        class="nav-link {{ 'active' if active=='records' }}">Sit-in Records</a>
     <a href="{{ url_for('sitin_reports') }}"        class="nav-link {{ 'active' if active=='analytics' }}">Analytics</a>
@@ -44,7 +43,7 @@
       <form action="{{ url_for('admin_sitin') }}" method="POST">
         <div class="form-group">
           <label>ID Number</label>
-          <input type="text" name="idno" id="sitinIdno" class="modal-input" required/>
+          <input type="text" name="idno" id="sitinIdno" class="modal-input" required oninput="lookupStudent(this.value)"/>
         </div>
         <div class="form-group">
           <label>Student Name</label>
@@ -110,7 +109,28 @@ function selectStudent(idno, name, sessions) {
 }
 
 function openSitin() { document.getElementById('sitinModal').style.display='flex'; }
-function closeSitin() { document.getElementById('sitinModal').style.display='none'; }
+function closeSitin() { document.getElementById('sitinModal').style.display='none'; document.getElementById('sitinIdno').value=''; document.getElementById('sitinName').value=''; document.getElementById('sitinSession').value=''; }
+
+let _lookupTimer = null;
+function lookupStudent(val) {
+  clearTimeout(_lookupTimer);
+  if (!val.trim()) { document.getElementById('sitinName').value=''; document.getElementById('sitinSession').value=''; return; }
+  _lookupTimer = setTimeout(() => {
+    fetch('/admin/search_student?q=' + encodeURIComponent(val.trim()))
+      .then(r => r.json())
+      .then(students => {
+        // Find exact match first, fallback to first result
+        const exact = students.find(s => s.idno === val.trim()) || students[0];
+        if (exact) {
+          document.getElementById('sitinName').value    = exact.name;
+          document.getElementById('sitinSession').value = exact.remaining_session;
+        } else {
+          document.getElementById('sitinName').value    = 'Student not found';
+          document.getElementById('sitinSession').value = '';
+        }
+      });
+  }, 400);
+}
 
 ['searchModal','sitinModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id) document.getElementById(id).style.display='none'; });
