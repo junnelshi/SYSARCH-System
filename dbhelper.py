@@ -104,6 +104,23 @@ def init_database():
     ''')
 
     cur.execute('''
+        CREATE TABLE IF NOT EXISTS settings (
+            key   VARCHAR(50) PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    ''')
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS software (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        VARCHAR(100) NOT NULL,
+            description TEXT,
+            filename    VARCHAR(255),
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    cur.execute('''
         CREATE TABLE IF NOT EXISTS notifications (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             idno       VARCHAR(20)  NOT NULL,
@@ -485,6 +502,103 @@ def get_sitin_stats():
         'lab_counts':     lab_counts,
         'daily_counts':   daily_counts,
     }
+
+
+
+
+def get_student_sitin_summary(idno):
+    """Returns sit-in summary stats for a student."""
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT
+            COUNT(*) as total_sessions,
+            ROUND(SUM((strftime('%s', logout_time) - strftime('%s', login_time)) / 3600.0), 2) as total_hours,
+            ROUND(AVG((strftime('%s', logout_time) - strftime('%s', login_time)) / 60.0), 1) as avg_duration_mins,
+            MAX((strftime('%s', logout_time) - strftime('%s', login_time)) / 60.0) as longest_session_mins
+        FROM sit_in_records
+        WHERE idno = ?
+    """, (idno,))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else {}
+
+
+def get_student_sessions_table(idno):
+    """Returns detailed session rows for a student with duration."""
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT
+            r.id,
+            r.lab,
+            r.purpose,
+            r.login_time,
+            r.logout_time,
+            ROUND((strftime('%s', r.logout_time) - strftime('%s', r.login_time)) / 60.0, 1) as duration_mins,
+            res.pc_number
+        FROM sit_in_records r
+        LEFT JOIN reservations res
+            ON res.idno = r.idno
+            AND res.lab  = r.lab
+            AND DATE(res.date) = DATE(r.login_time)
+            AND res.status = 'approved'
+        WHERE r.idno = ?
+        ORDER BY r.login_time DESC
+    """, (idno,))
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_reservation_setting():
+    """Get global reservation enabled/disabled setting."""
+    conn = connect()
+    cur  = conn.cursor()
+    try:
+        cur.execute("SELECT value FROM settings WHERE key = 'reservation_enabled'")
+        row = cur.fetchone()
+        return row['value'] == '1' if row else True
+    except:
+        return True
+    finally:
+        conn.close()
+
+
+def set_reservation_setting(enabled: bool):
+    """Enable or disable reservations globally."""
+    conn = connect()
+    cur  = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO settings (key, value) VALUES ('reservation_enabled', ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        """, ('1' if enabled else '0',))
+        conn.commit()
+        return True
+    except Exception as e:
+        print("set_reservation_setting error:", e)
+        return False
+    finally:
+        conn.close()
+
+
+def get_all_software():
+    """Get all uploaded software entries."""
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("SELECT * FROM software ORDER BY created_at DESC")
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def add_software(name, description, filename):
+    return addrecord('software', name=name, description=description, filename=filename)
+
+
+def delete_software(sw_id):
+    return deleterecord('software', id=sw_id)
 
 
 # ── Announcements ─────────────────────────────────────────────────────────────

@@ -6,6 +6,46 @@
   <title>Dashboard — CCS Sit-in Monitoring System</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+
+    /* ── Dark Mode ── */
+    body.dark { background:#0f1117; color:#e8eaf0; }
+    body.dark .navbar { background:linear-gradient(90deg,#0d1b2a,#1a3560); }
+    body.dark .card, body.dark .profile-card, body.dark .rules-card { background:#1a1f2e; box-shadow:0 2px 10px rgba(0,0,0,.3); }
+    body.dark .card-body, body.dark .student-info-body, body.dark .rules-body { background:#1a1f2e; }
+    body.dark .form-input { background:#252a3a; border-color:#2a2f3e; color:#e8eaf0; }
+    body.dark .ann-text, body.dark .info-value { color:#cbd5e0; }
+    body.dark .ann-meta { color:#63b3ed; }
+    body.dark .data-table th { background:#252a3a; color:#a0aec0; }
+    body.dark .data-table td { color:#cbd5e0; border-color:#2a2f3e; }
+    body.dark .summary-stat { background:#252a3a; border-color:#2a2f3e; }
+    body.dark .tab-pane { background:transparent; }
+    body.dark .session-bar-bg { background:#2a2f3e; }
+    body.dark .btn-outline { background:#252a3a; color:#e8eaf0; border-color:#2a2f3e; }
+    body.dark .notif-panel { background:#1a1f2e; }
+    body.dark .notif-item { background:#252a3a; border-color:#2a2f3e; }
+    body.dark .notif-item.unread { background:rgba(59,130,246,.1); }
+    body.dark .page-wrap { color:#e8eaf0; }
+
+    /* ── Sit-in Summary Cards ── */
+    .summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+    @media(max-width:768px){.summary-grid{grid-template-columns:1fr 1fr;}}
+    .summary-stat {
+      background:#fff; border-radius:12px; padding:16px 18px;
+      border:1px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,.06);
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .summary-stat .s-icon { display:none; }
+    .summary-stat .s-val  { font-size:1.1rem; font-weight:700; color:#2a5298; line-height:1.2; }
+    .summary-stat .s-lbl  { font-size:0.7rem; color:#718096; font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+    .summary-stat         { padding:12px 14px; }
+
+    /* ── Disabled reservation notice ── */
+    .res-disabled-banner {
+      background:#fff5f5; border:1.5px solid #fed7d7; border-radius:10px;
+      padding:14px 18px; color:#742a2a; font-size:0.88rem; font-weight:600;
+      display:flex; align-items:center; gap:10px; margin-bottom:16px;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #f0f4f8; min-height: 100vh; }
 
@@ -308,6 +348,7 @@
   <span class="navbar-brand">Student Dashboard</span>
   <div class="navbar-links">
     <a href="#" class="nav-btn" onclick="showTab('announcements');return false;">Home</a>
+    <a href="#" class="nav-btn" onclick="showTab('sitin-summary');return false;">Sit-in Summary</a>
     <a href="#" class="nav-btn" onclick="showTab('sitin-history');return false;">Sit-in History</a>
     <a href="#" class="nav-btn" onclick="showTab('editprofile');return false;">Edit Profile</a>
     <a href="#" class="nav-btn" onclick="showTab('myreservations');return false;">My Reservations</a>
@@ -328,6 +369,7 @@
       </button>
     </div>
 
+    <button onclick="toggleDark()" id="darkBtn" class="nav-btn" title="Toggle Dark Mode">🌙</button>
     <a href="{{ url_for('logout') }}" class="nav-btn logout">Log out</a>
   </div>
 </nav>
@@ -460,6 +502,78 @@
           {% else %}
             <p class="no-data">No announcements at this time.</p>
           {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Sit-in Summary ── -->
+    <div id="tab-sitin-summary" class="tab-pane">
+
+      <!-- Summary stats -->
+      <div class="summary-grid">
+        <div class="summary-stat">
+          <div class="s-lbl">Total Sit-in Hours</div>
+          <div class="s-val">{{ "%.2f"|format(sitin_summary.total_hours|float) if sitin_summary.total_hours else '0.00' }} <span style="font-size:0.72rem;font-weight:500;color:#718096;">hrs</span></div>
+        </div>
+        <div class="summary-stat">
+          <div class="s-lbl">Number of Sessions</div>
+          <div class="s-val">{{ sitin_summary.total_sessions or 0 }}</div>
+        </div>
+        <div class="summary-stat">
+          <div class="s-lbl">Avg Session Duration</div>
+          <div class="s-val">{{ "%.1f"|format(sitin_summary.avg_duration_mins|float) if sitin_summary.avg_duration_mins else '0.0' }} <span style="font-size:0.72rem;font-weight:500;color:#718096;">min</span></div>
+        </div>
+        <div class="summary-stat">
+          <div class="s-lbl">Longest Session</div>
+          <div class="s-val">{{ "%.1f"|format(sitin_summary.longest_session_mins|float) if sitin_summary.longest_session_mins else '0.0' }} <span style="font-size:0.72rem;font-weight:500;color:#718096;">min</span></div>
+        </div>
+      </div>
+
+      <!-- Sessions Table -->
+      <div class="card">
+        <div class="card-header">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Sessions Table
+        </div>
+        <div class="card-body" style="padding:0;">
+          {% if sessions_table %}
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th><th>Time-in</th><th>Time-out</th>
+                <th>Duration</th><th>Lab</th><th>PC No.</th><th>Purpose</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in sessions_table %}
+              <tr>
+                <td>{{ s.login_time[:10] if s.login_time else '—' }}</td>
+                <td>{{ s.login_time[11:16] if s.login_time else '—' }}</td>
+                <td>{{ s.logout_time[11:16] if s.logout_time else '—' }}</td>
+                <td>
+                  {% if s.duration_mins %}
+                    <span style="font-weight:600;color:#2a5298;">{{ s.duration_mins }} min</span>
+                  {% else %}—{% endif %}
+                </td>
+                <td>{{ s.lab }}</td>
+                <td>
+                  {% if s.pc_number %}
+                    <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:5px;padding:2px 7px;font-size:0.75rem;font-weight:700;">
+                      PC-{{ '%02d'|format(s.pc_number|int) }}
+                    </span>
+                  {% else %}
+                    <span style="color:#a0aec0;font-size:0.78rem;">Walk-in</span>
+                  {% endif %}
+                </td>
+                <td>{{ s.purpose }}</td>
+                <td><span class="badge badge-approved">Completed</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+            <p class="no-data">No sessions recorded yet.</p>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -611,7 +725,12 @@
           Reserve a PC
         </div>
         <div class="card-body">
-          <form action="{{ url_for('student_reserve') }}" method="POST" id="reserveForm">
+          {% if not reservation_on %}
+            <div class="res-disabled-banner">
+              🚫 Reservations are currently disabled by the administrator. Please check back later.
+            </div>
+            {% else %}
+            <form action="{{ url_for('student_reserve') }}" method="POST" id="reserveForm">
 
             <!-- Step 1: Pick date & lab first -->
             <div class="form-grid-2" style="margin-bottom:16px;">
@@ -682,7 +801,8 @@
               <input type="text" name="purpose" class="form-input" placeholder="e.g. C Programming, Research…" required/>
             </div>
             <button type="submit" class="btn-submit" style="margin-top:14px;" id="reserveSubmitBtn">Submit Reservation</button>
-          </form>
+            </form>
+            {% endif %}
         </div>
       </div>
     </div>
@@ -783,6 +903,21 @@
 
 <script>
 // ── Tab switching ──────────────────────────────────────────────────────────
+// ── Dark Mode ──────────────────────────────────────────────────────────────
+function toggleDark() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('darkMode', isDark ? '1' : '0');
+  document.getElementById('darkBtn').textContent = isDark ? '☀️' : '🌙';
+}
+// Restore dark mode preference on load
+(function(){
+  if (localStorage.getItem('darkMode') === '1') {
+    document.body.classList.add('dark');
+    const btn = document.getElementById('darkBtn');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
 function showTab(name) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');

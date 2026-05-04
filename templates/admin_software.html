@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Software — CCS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <style>
+    .page-wrap  { max-width:1100px; margin:0 auto; padding:24px; }
+    .page-title { font-size:1.2rem; font-weight:800; color:#1a202c; margin-bottom:20px; }
+    .top-grid   { display:grid; grid-template-columns:1fr 380px; gap:20px; align-items:start; }
+    @media(max-width:768px){ .top-grid{ grid-template-columns:1fr; } }
+    .card { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.07); overflow:hidden; }
+    .card-header { background:linear-gradient(90deg,#2a5298,#3b6fd4); color:#fff; padding:14px 20px; font-size:0.92rem; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .card-body  { padding:20px; }
+    .form-field { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+    .form-field label { font-size:0.72rem; color:#718096; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+    .form-input { width:100%; padding:9px 13px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.88rem; font-family:'Inter',sans-serif; outline:none; transition:border .15s; }
+    .form-input:focus { border-color:#2a5298; }
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:8px; font-size:0.84rem; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; border:none; text-decoration:none; transition:all .15s; }
+    .btn-primary { background:#2a5298; color:#fff; }
+    .btn-primary:hover { background:#1a3560; }
+    .btn-danger  { background:#fff; color:#e53e3e; border:1.5px solid #fed7d7; }
+    .btn-danger:hover { background:#fff5f5; }
+    .sw-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+    .sw-table th { background:#f7fafc; padding:10px 16px; text-align:left; font-size:0.72rem; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:.04em; border-bottom:2px solid #e2e8f0; }
+    .sw-table td { padding:12px 16px; border-bottom:1px solid #f0f4f8; color:#2d3748; vertical-align:middle; }
+    .sw-table tr:last-child td { border-bottom:none; }
+    .sw-table tr:hover td { background:#f7fafc; }
+    .file-icon { font-size:1.4rem; }
+    .sw-name   { font-weight:700; color:#1a202c; }
+    .sw-desc   { font-size:0.78rem; color:#718096; margin-top:2px; }
+    .sw-file   { font-size:0.78rem; color:#2a5298; }
+    .upload-area {
+      border:2px dashed #e2e8f0; border-radius:10px; padding:24px;
+      text-align:center; cursor:pointer; transition:all .15s; background:#f7fafc;
+    }
+    .upload-area:hover { border-color:#2a5298; background:#eff6ff; }
+    .upload-area input { display:none; }
+    .upload-icon { font-size:2rem; margin-bottom:8px; }
+    .upload-text { font-size:0.84rem; color:#718096; }
+    .upload-text strong { color:#2a5298; }
+    .flash-wrap { max-width:1100px; margin:16px auto 0; padding:0 24px; }
+    .flash { display:flex; align-items:center; justify-content:space-between; padding:11px 18px; border-radius:8px; font-size:0.88rem; font-weight:500; margin-bottom:8px; }
+    .flash button { background:none; border:none; cursor:pointer; opacity:.5; }
+    .flash-success { background:#c6f6d5; border-left:4px solid #38a169; color:#22543d; }
+    .flash-error   { background:#fed7d7; border-left:4px solid #e53e3e; color:#742a2a; }
+    .empty { text-align:center; padding:40px; color:#a0aec0; font-size:0.88rem; }
+    #selectedFileName { font-size:0.78rem; color:#38a169; margin-top:6px; font-weight:600; }
+  </style>
+</head>
+<body>
+{% from 'macros.html' import admin_nav %}
+{{ admin_nav('software') }}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="page-wrap">
+  <div class="page-title">💾 Software Management</div>
+
+  <div class="top-grid">
+
+    <!-- Software list -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Available Software
+      </div>
+      {% if software %}
+      <table class="sw-table">
+        <thead>
+          <tr><th>Software</th><th>File</th><th>Uploaded</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          {% for sw in software %}
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="file-icon">💾</span>
+                <div>
+                  <div class="sw-name">{{ sw.name }}</div>
+                  {% if sw.description %}<div class="sw-desc">{{ sw.description }}</div>{% endif %}
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if sw.filename %}
+                <a href="{{ url_for('static', filename='uploads/software/' + sw.filename) }}"
+                   class="sw-file" download>⬇ {{ sw.filename }}</a>
+              {% else %}—{% endif %}
+            </td>
+            <td style="color:#718096;font-size:0.78rem;">{{ sw.created_at[:10] if sw.created_at else '—' }}</td>
+            <td>
+              <a href="{{ url_for('delete_software_route', sw_id=sw.id) }}"
+                 class="btn btn-danger" style="padding:5px 12px;font-size:0.78rem;"
+                 onclick="return confirm('Remove {{ sw.name }}?')">Remove</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <div class="empty">No software uploaded yet. Use the form to add software.</div>
+      {% endif %}
+    </div>
+
+    <!-- Upload form -->
+    <div class="card">
+      <div class="card-header">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        Upload Software
+      </div>
+      <div class="card-body">
+        <form action="{{ url_for('upload_software') }}" method="POST" enctype="multipart/form-data">
+          <div class="form-field">
+            <label>Software Name</label>
+            <input type="text" name="name" class="form-input" placeholder="e.g. Visual Studio Code" required/>
+          </div>
+          <div class="form-field">
+            <label>Description (optional)</label>
+            <input type="text" name="description" class="form-input" placeholder="e.g. Code editor for programming"/>
+          </div>
+          <div class="form-field">
+            <label>File</label>
+            <div class="upload-area" onclick="document.getElementById('swFile').click()">
+              <div class="upload-icon">📁</div>
+              <div class="upload-text">Click to browse or <strong>drag & drop</strong></div>
+              <div class="upload-text" style="font-size:0.72rem;margin-top:4px;">Any file type accepted</div>
+              <input type="file" id="swFile" name="file" required onchange="showFile(this)"/>
+            </div>
+            <div id="selectedFileName"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;">
+            Upload Software
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showFile(input) {
+  const fn = document.getElementById('selectedFileName');
+  fn.textContent = input.files[0] ? '✓ ' + input.files[0].name : '';
+}
+setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); },5000);
+</script>
+</body>
+</html>

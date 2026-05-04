@@ -36,6 +36,13 @@ from dbhelper import (
     mark_notification_read,
     mark_all_notifications_read,
     delete_notifications_by_content,
+    get_student_sitin_summary,
+    get_student_sessions_table,
+    get_reservation_setting,
+    set_reservation_setting,
+    get_all_software,
+    add_software,
+    delete_software,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -175,13 +182,19 @@ def dashboard():
     unread_count  = get_unread_count(session['student_id'])
     # Convert sqlite3.Row objects → plain dicts so tojson works in the template
     notifications = [dict(n) for n in notifications_raw]
+    sitin_summary   = get_student_sitin_summary(session['student_id'])
+    sessions_table  = get_student_sessions_table(session['student_id'])
+    reservation_on  = get_reservation_setting()
     return render_template('student_profile.html',
                            student=student,
                            announcements=announcements,
                            reservations=reservations,
                            sitin_history=sitin_history,
                            notifications=notifications,
-                           unread_count=unread_count)
+                           unread_count=unread_count,
+                           sitin_summary=sitin_summary,
+                           sessions_table=sessions_table,
+                           reservation_on=reservation_on)
 
 # ── Admin: Announcements ──────────────────────────────────────────────────────
 
@@ -431,8 +444,11 @@ def feedback_reports():
 def admin_reservations():
     r = admin_required()
     if r: return r
-    reservations = get_all_reservations()
-    return render_template('admin_reservations.html', reservations=reservations)
+    reservations    = get_all_reservations()
+    reservation_on  = get_reservation_setting()
+    return render_template('admin_reservations.html',
+                           reservations=reservations,
+                           reservation_on=reservation_on)
 
 
 @app.route('/admin/reservations/update/<int:res_id>/<status>')
@@ -612,6 +628,105 @@ def reserved_pcs():
         return jsonify([])
     pcs = get_reserved_pcs(lab, date)
     return jsonify([str(p) for p in pcs])
+
+
+# ── Admin: Generate Reports (PDF / CSV) ──────────────────────────────────────
+
+@app.route('/admin/reports/csv')
+def export_csv():
+    r = admin_required()
+    if r: return r
+    import csv, io
+    from flask import Response
+    records = get_sitin_records()
+    output  = io.StringIO()
+    # Use tab delimiter so Excel doesn't auto-format dates as numbers
+    writer  = csv.writer(output)
+    writer.writerow(['#','ID Number','Name','Course','Purpose','Lab','Login Time','Logout Time'])
+    for i, rec in enumerate(records, 1):
+        # Prefix datetime strings with a tab to force Excel to treat as text
+        login  = str(rec['login_time'])  if rec['login_time']  else ''
+        logout = str(rec['logout_time']) if rec['logout_time'] else ''
+        writer.writerow([i, str(rec['idno']),
+                         f"{rec['firstname']} {rec['lastname']}",
+                         rec['course'], rec['purpose'], rec['lab'],
+                         login, logout])
+    output.seek(0)
+    # BOM so Excel opens with correct encoding and treats text as text
+    bom    = u'\ufeff'
+    final  = io.StringIO(bom + output.getvalue())
+    return Response(final, mimetype='text/csv; charset=utf-8-sig',
+                    headers={'Content-Disposition': 'attachment;filename=sitin_records.csv'})
+
+
+@app.route('/admin/reports/pdf')
+def export_pdf():
+    r = admin_required()
+    if r: return r
+    records = get_sitin_records()
+    stats   = get_sitin_stats()
+    return render_template('report_pdf.html', records=records, stats=stats)
+
+
+# ── Admin: Disable / Enable Reservation ──────────────────────────────────────
+
+@app.route('/admin/reservation/toggle', methods=['POST'])
+def toggle_reservation():
+    r = admin_required()
+    if r: return r
+    current = get_reservation_setting()
+    set_reservation_setting(not current)
+    status = 'enabled' if not current else 'disabled'
+    flash(f'Reservations have been {status}.', 'success')
+    return redirect(url_for('admin_reservations'))
+
+
+# ── Admin: Software Upload ────────────────────────────────────────────────────
+
+@app.route('/admin/software')
+def admin_software():
+    r = admin_required()
+    if r: return r
+    software = get_all_software()
+    return render_template('admin_software.html', software=software)
+
+
+@app.route('/admin/software/upload', methods=['POST'])
+def upload_software():
+    r = admin_required()
+    if r: return r
+    name        = request.form.get('name','').strip()
+    description = request.form.get('description','').strip()
+    file        = request.files.get('file')
+    if not name or not file or not file.filename:
+        flash('Name and file are required.', 'error')
+        return redirect(url_for('admin_software'))
+    filename = secure_filename(file.filename)
+    save_path = os.path.join('static', 'uploads', 'software')
+    os.makedirs(save_path, exist_ok=True)
+    file.save(os.path.join(save_path, filename))
+    add_software(name, description, filename)
+    flash('Software uploaded successfully.', 'success')
+    return redirect(url_for('admin_software'))
+
+
+@app.route('/admin/software/delete/<int:sw_id>')
+def delete_software_route(sw_id):
+    r = admin_required()
+    if r: return r
+    delete_software(sw_id)
+    flash('Software removed.', 'success')
+    return redirect(url_for('admin_software'))
+
+
+# ── Student: Get available software (AJAX) ────────────────────────────────────
+
+@app.route('/student/software')
+def student_software():
+    rr = login_required()
+    if rr: return rr
+    software = get_all_software()
+    return jsonify(software)
 
 
 if __name__ == '__main__':

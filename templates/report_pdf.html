@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Sit-in Report — CCS</title>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Arial', sans-serif; font-size:12px; color:#1a202c; background:#fff; padding:30px; }
+    .header { text-align:center; margin-bottom:24px; border-bottom:2px solid #2a5298; padding-bottom:16px; }
+    .header h1 { font-size:18px; color:#2a5298; font-weight:800; }
+    .header p  { font-size:11px; color:#718096; margin-top:4px; }
+    .stats-row { display:flex; gap:16px; margin-bottom:20px; }
+    .stat-box  { flex:1; border:1px solid #e2e8f0; border-radius:8px; padding:12px; text-align:center; }
+    .stat-box .num { font-size:20px; font-weight:800; color:#2a5298; }
+    .stat-box .lbl { font-size:10px; color:#718096; text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    thead th { background:#2a5298; color:#fff; padding:8px 10px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+    tbody td { padding:7px 10px; border-bottom:1px solid #f0f4f8; font-size:11px; }
+    tbody tr:nth-child(even) td { background:#f7fafc; }
+    .footer { margin-top:24px; text-align:center; font-size:10px; color:#a0aec0; border-top:1px solid #e2e8f0; padding-top:12px; }
+    @media print {
+      body { padding:15px; }
+      .no-print { display:none !important; }
+      table { page-break-inside:auto; }
+      tr { page-break-inside:avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print" style="background:#2a5298;color:#fff;padding:12px 20px;margin:-30px -30px 24px;display:flex;align-items:center;justify-content:space-between;">
+  <span style="font-size:14px;font-weight:700;">📄 Sit-in Report Preview</span>
+  <div style="display:flex;gap:10px;">
+    <button onclick="window.print()" style="background:#fff;color:#2a5298;border:none;padding:7px 18px;border-radius:6px;font-weight:700;cursor:pointer;font-family:Arial;">🖨 Print / Save PDF</button>
+    <a href="{{ url_for('export_csv') }}" style="background:#38a169;color:#fff;border:none;padding:7px 18px;border-radius:6px;font-weight:700;cursor:pointer;text-decoration:none;font-family:Arial;">⬇ Export CSV</a>
+    <a href="{{ url_for('sitin_records') }}" style="background:rgba(255,255,255,.2);color:#fff;padding:7px 18px;border-radius:6px;font-weight:700;text-decoration:none;">← Back</a>
+  </div>
+</div>
+
+<div class="header">
+  <h1>University of Cebu — College of Computer Studies</h1>
+  <p>CCS Sit-in Monitoring System — Generated Report</p>
+  <p style="margin-top:6px;">Date Generated: <strong>{{ now if now else '' }}</strong></p>
+</div>
+
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="num">{{ stats.total_students }}</div>
+    <div class="lbl">Students Registered</div>
+  </div>
+  <div class="stat-box">
+    <div class="num">{{ stats.total_sitins }}</div>
+    <div class="lbl">Total Sit-in Sessions</div>
+  </div>
+  <div class="stat-box">
+    <div class="num">{{ stats.currently_in }}</div>
+    <div class="lbl">Currently Sitting In</div>
+  </div>
+  <div class="stat-box">
+    <div class="num">{{ records|length }}</div>
+    <div class="lbl">Records in Report</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>ID Number</th>
+      <th>Name</th>
+      <th>Course</th>
+      <th>Purpose</th>
+      <th>Lab</th>
+      <th>Login Time</th>
+      <th>Logout Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in records %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td><strong>{{ r.idno }}</strong></td>
+      <td>{{ r.firstname }} {{ r.lastname }}</td>
+      <td>{{ r.course }}</td>
+      <td>{{ r.purpose }}</td>
+      <td>{{ r.lab }}</td>
+      <td>{{ r.login_time }}</td>
+      <td>{{ r.logout_time }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" style="text-align:center;padding:20px;color:#a0aec0;">No records found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="footer">
+  CCS Sit-in Monitoring System · University of Cebu · College of Computer Studies
+</div>
+</body>
+</html>

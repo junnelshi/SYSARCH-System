@@ -38,12 +38,14 @@
     .actions-cell { display: flex; gap: 6px; }
 
     /* Lab grid panel */
-    .lab-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 16px; margin-bottom: 24px; }
-    .lab-grid-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
-    .lab-grid-title { font-size: 0.82rem; font-weight: 700; color: #1a202c; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .lab-grid-title span { font-size: 0.72rem; color: #718096; font-weight: 400; }
-    .mini-pc-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; }
-    .mini-pc { width: 100%; aspect-ratio: 1; border-radius: 5px; border: 1.5px solid; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; cursor: default; position: relative; }
+    .lab-overview { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+    @media(max-width:1100px){ .lab-overview{ grid-template-columns: repeat(3,1fr); } }
+    @media(max-width:700px) { .lab-overview{ grid-template-columns: repeat(2,1fr); } }
+    .lab-grid-card { background: #fff; border-radius: 10px; padding: 10px 12px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+    .lab-grid-title { font-size: 0.78rem; font-weight: 700; color: #1a202c; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .lab-grid-title span { font-size: 0.68rem; color: #718096; font-weight: 400; }
+    .mini-pc-grid { display: grid; grid-template-columns: repeat(10,1fr); gap: 3px; }
+    .mini-pc { width:100%; aspect-ratio:1; border-radius: 3px; border: 1px solid; display: flex; align-items: center; justify-content: center; font-size: 0.45rem; font-weight: 700; cursor: default; }
     .mini-pc.available { background: #f0fff4; border-color: #9ae6b4; color: #22543d; }
     .mini-pc.reserved  { background: #fff5f5; border-color: #feb2b2; color: #742a2a; }
     .mini-pc.pending   { background: #fffff0; border-color: #faf089; color: #744210; }
@@ -76,9 +78,25 @@
 {% endwith %}
 
 <div class="page-wrap">
-  <div class="page-header">
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div class="page-title">Lab Reservations</div>
+    <form action="{{ url_for('toggle_reservation') }}" method="POST">
+      <button type="submit" class="btn {% if reservation_on %}btn-danger{% else %}btn-success{% endif %} btn-sm"
+        onclick="return confirm('{% if reservation_on %}Disable{% else %}Enable{% endif %} reservations for all students?')"
+        style="display:inline-flex;align-items:center;gap:6px;">
+        {% if reservation_on %}
+          🔒 Disable Reservations
+        {% else %}
+          🔓 Enable Reservations
+        {% endif %}
+      </button>
+    </form>
   </div>
+  {% if not reservation_on %}
+  <div style="background:#fff5f5;border:1.5px solid #fed7d7;border-radius:10px;padding:12px 18px;color:#742a2a;font-size:0.88rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+    🚫 Reservations are currently <strong>DISABLED</strong> for all students.
+  </div>
+  {% endif %}
 
   <!-- Lab PC Availability Overview -->
   {% set labs = ['524','526','528','530','542'] %}
@@ -112,9 +130,9 @@
             {% endif %}
           {% endfor %}
         </div>
-        <div class="lab-legend">
+        <div class="lab-legend" style="margin-top:6px;">
           <div class="leg-item"><span class="leg-dot" style="background:#9ae6b4;"></span> Available</div>
-          <div class="leg-item"><span class="leg-dot" style="background:#feb2b2;"></span> Approved</div>
+          <div class="leg-item"><span class="leg-dot" style="background:#feb2b2;"></span> Reserved</div>
           <div class="leg-item"><span class="leg-dot" style="background:#faf089;"></span> Pending</div>
         </div>
       </div>

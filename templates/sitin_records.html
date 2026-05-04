@@ -12,7 +12,13 @@
 {{ admin_nav('records') }}
 
 <div class="admin-page">
-  <div class="page-heading">Sit-in Records</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+    <div class="page-heading" style="margin:0;">Sit-in Records</div>
+    <div style="display:flex;gap:8px;">
+      <a href="{{ url_for('export_pdf') }}" class="btn btn-primary btn-sm" target="_blank">📄 Export PDF</a>
+      <a href="{{ url_for('export_csv') }}" class="btn btn-success btn-sm">⬇ Export CSV</a>
+    </div>
+  </div>
 
   <div class="card">
     <div class="card-header">
