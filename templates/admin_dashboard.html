@@ -7,42 +7,182 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
   <style>
-    .leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
+    /* ── Summary strip ── */
+    .summary-boxes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .summary-box {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.07);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-left: 4px solid transparent;
+    }
+    .summary-box.blue   { border-left-color: #2a5298; }
+    .summary-box.green  { border-left-color: #38a169; }
+    .summary-box.orange { border-left-color: #d69e2e; }
+    .summary-icon {
+      width: 38px; height: 38px; min-width: 38px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .summary-icon.blue   { background: #ebf4ff; }
+    .summary-icon.green  { background: #c6f6d5; }
+    .summary-icon.orange { background: #fefcbf; }
+    .summary-num { font-size: 1.45rem; font-weight: 800; color: #1a202c; line-height: 1; }
+    .summary-lbl { font-size: 0.68rem; color: #718096; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+
+    /* ── Main 3-col grid ── */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    /* ── Card base ── */
+    .card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+    .card-header {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(90deg,#2a5298,#3b6fd4);
+      color: #fff; padding: 10px 14px;
+      font-size: 0.82rem; font-weight: 700; line-height: 1;
+    }
+    .card-header svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .card-body { padding: 14px; }
+
+    /* ── Announcement ── */
+    .ann-textarea {
+      width: 100%; padding: 9px 11px;
+      border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 0.82rem;
+      resize: vertical; outline: none; transition: border .15s;
+    }
+    .ann-textarea:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,.1); }
+
+    .btn-post {
+      display: inline-flex; align-items: center;
+      padding: 7px 16px; border-radius: 7px; border: none;
+      font-size: 0.8rem; font-weight: 700;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+      background: #38a169; color: #fff; transition: background .15s;
+      margin-top: 8px;
+    }
+    .btn-post:hover { background: #276749; }
+
+    .ann-list { margin-top: 14px; max-height: 280px; overflow-y: auto; }
+    .ann-list-title { font-size: 0.8rem; font-weight: 700; color: #1a202c; margin-bottom: 8px; }
+    .ann-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid #f0f4f8;
+    }
+    .ann-item:last-child { border-bottom: none; }
+    .ann-dot { width: 7px; height: 7px; border-radius: 50%; background: #2a5298; flex-shrink: 0; margin-top: 5px; }
+    .ann-content { flex: 1; min-width: 0; }
+    .ann-meta { font-size: 0.7rem; font-weight: 700; color: #2a5298; margin-bottom: 1px; }
+    .ann-body { font-size: 0.78rem; color: #4a5568; line-height: 1.45; }
+    .ann-delete {
+      font-size: 0.68rem; color: #e53e3e; padding: 2px 7px; border-radius: 4px;
+      border: 1px solid #fed7d7; background: #fff5f5; flex-shrink: 0;
+      text-decoration: none; transition: all .12s;
+    }
+    .ann-delete:hover { background: #e53e3e; color: #fff; border-color: #e53e3e; }
+
+    /* ── Lab Activity ── */
+    .stat-strip {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid #f0f4f8;
+    }
+    .stat-strip-item { padding: 10px 14px; }
+    .stat-strip-item:first-child { border-right: 1px solid #f0f4f8; }
+    .strip-num { font-size: 1.35rem; font-weight: 800; color: #2a5298; }
+    .strip-num.green { color: #38a169; }
+    .strip-lbl { font-size: 0.62rem; color: #718096; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-top: 1px; }
+
+    .section-label {
+      font-size: 0.62rem; font-weight: 700; color: #a0aec0;
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 7px;
+    }
+
+    .bar-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .bar-name { font-size: 0.7rem; font-weight: 700; min-width: 38px; }
+    .bar-name.blue  { color: #2a5298; }
+    .bar-name.gray  { color: #4a5568; font-weight: 600; min-width: 62px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { flex: 1; background: #e2e8f0; border-radius: 4px; height: 6px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 4px; }
+    .bar-fill.blue  { background: linear-gradient(90deg,#2a5298,#3b6fd4); }
+    .bar-fill.green { background: linear-gradient(90deg,#38a169,#48bb78); }
+    .bar-count { font-size: 0.68rem; color: #718096; min-width: 14px; text-align: right; }
+
+    .view-link {
+      display: block; text-align: center; margin-top: 8px;
+      font-size: 0.72rem; color: #2a5298; font-weight: 600; text-decoration: none;
+    }
+    .view-link:hover { text-decoration: underline; }
+
+    /* ── Leaderboard ── */
     .lb-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px; border-radius: 10px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 9px; border-radius: 9px;
       border: 1px solid #e2e8f0; background: #f7fafc;
-      transition: background .15s; text-decoration: none;
+      margin-bottom: 6px; text-decoration: none; transition: background .15s;
     }
     .lb-row:hover { background: #eff6ff; border-color: #bfdbfe; }
-    .lb-rank { font-size: 1rem; font-weight: 800; min-width: 28px; text-align: center; }
+    .lb-rank { font-size: 0.92rem; font-weight: 800; min-width: 24px; text-align: center; }
     .lb-avatar {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 28px; height: 28px; border-radius: 50%;
       background: linear-gradient(135deg,#2a5298,#63b3ed);
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.72rem; font-weight: 700; color: #fff;
+      font-size: 0.65rem; font-weight: 700; color: #fff;
       overflow: hidden; flex-shrink: 0;
     }
     .lb-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .lb-info { flex: 1; min-width: 0; }
-    .lb-name    { font-size: 0.84rem; font-weight: 700; color: #1a202c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .lb-course  { font-size: 0.72rem; color: #718096; }
-    .lb-pts     { font-size: 0.82rem; font-weight: 800; color: #d97706; white-space: nowrap; }
+    .lb-name   { font-size: 0.78rem; font-weight: 700; color: #1a202c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-course { font-size: 0.65rem; color: #718096; }
+    .lb-pts    { font-size: 0.76rem; font-weight: 800; color: #d97706; white-space: nowrap; }
+
     .view-all-btn {
-      display: block; width: 100%; margin-top: 10px; padding: 9px;
-      background: #f7fafc; border: 1.5px solid #e2e8f0; border-radius: 9px;
-      font-size: 0.82rem; font-weight: 700; color: #2a5298;
+      display: block; width: 100%; margin-top: 8px; padding: 7px;
+      background: #f7fafc; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      font-size: 0.76rem; font-weight: 700; color: #2a5298;
       font-family: 'Inter',sans-serif; cursor: pointer; text-align: center;
       text-decoration: none; transition: all .15s;
     }
     .view-all-btn:hover { background: #eff6ff; border-color: #2a5298; }
-    .no-lb { text-align: center; padding: 24px 0; color: #a0aec0; font-size: 0.84rem; }
+    .no-lb { text-align: center; padding: 20px 0; color: #a0aec0; font-size: 0.8rem; }
+
+    /* ── Dark mode extras ── */
+    body.dark .summary-box { background: #1e293b; }
+    body.dark .summary-num { color: #f1f5f9; }
+    body.dark .card { background: #1e293b; }
+    body.dark .ann-textarea { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    body.dark .ann-list-title { color: #f1f5f9; }
+    body.dark .ann-meta { color: #60a5fa; }
+    body.dark .ann-body { color: #94a3b8; }
+    body.dark .ann-item { border-bottom-color: #1e293b; }
+    body.dark .stat-strip { border-bottom-color: #334155; }
+    body.dark .stat-strip-item:first-child { border-right-color: #334155; }
+    body.dark .strip-num { color: #60a5fa; }
+    body.dark .strip-num.green { color: #4ade80; }
+    body.dark .bar-track { background: #334155; }
+    body.dark .bar-name.gray { color: #94a3b8; }
+    body.dark .lb-row { background: #0f172a; border-color: #334155; }
+    body.dark .lb-row:hover { background: #1e3a5f; border-color: #3b82f6; }
+    body.dark .lb-name { color: #f1f5f9; }
+    body.dark .view-all-btn { background: #0f172a; border-color: #334155; color: #60a5fa; }
+    body.dark .view-all-btn:hover { background: #1e3a5f; border-color: #3b82f6; }
   </style>
 </head>
 <body>
 {% from 'macros.html' import admin_nav %}
-
-<!-- ── Navbar ── -->
 {{ admin_nav('home') }}
 
 <div class="admin-page">
@@ -62,7 +202,7 @@
   <div class="summary-boxes">
     <div class="summary-box blue">
       <div class="summary-icon blue">
-        <svg fill="none" viewBox="0 0 24 24" stroke="#2a5298" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <svg fill="none" viewBox="0 0 24 24" stroke="#2a5298" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       </div>
       <div>
         <div class="summary-num">{{ stats.total_students }}</div>
@@ -71,7 +211,7 @@
     </div>
     <div class="summary-box green">
       <div class="summary-icon green">
-        <svg fill="none" viewBox="0 0 24 24" stroke="#38a169" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <svg fill="none" viewBox="0 0 24 24" stroke="#38a169" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
       </div>
       <div>
         <div class="summary-num">{{ stats.currently_in }}</div>
@@ -80,7 +220,7 @@
     </div>
     <div class="summary-box orange">
       <div class="summary-icon orange">
-        <svg fill="none" viewBox="0 0 24 24" stroke="#d69e2e" stroke-width="2" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <svg fill="none" viewBox="0 0 24 24" stroke="#d69e2e" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
       </div>
       <div>
         <div class="summary-num">{{ stats.total_sitins }}</div>
@@ -89,21 +229,21 @@
     </div>
   </div>
 
-  <!-- Main layout: Announcement half | Lab Activity | Leaderboard — 3 columns -->
-  <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:20px;align-items:start;">
+  <!-- Main 3-column grid -->
+  <div class="dash-grid">
 
-    <!-- ── LEFT: Announcement card (big) ── -->
+    <!-- ── Announcement ── -->
     <div class="card">
       <div class="card-header">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
         Announcement
       </div>
       <div class="card-body">
         <form action="{{ url_for('add_announcement_route') }}" method="POST">
-          <textarea name="content" class="ann-textarea" placeholder="Write a new announcement…" rows="4" required></textarea>
-          <button type="submit" class="btn btn-success" style="padding:8px 22px;margin-top:10px;">Post Announcement</button>
+          <textarea name="content" class="ann-textarea" placeholder="Write a new announcement…" rows="3" required></textarea>
+          <button type="submit" class="btn-post">Post Announcement</button>
         </form>
-        <div class="ann-list" style="margin-top:18px;">
+        <div class="ann-list">
           <div class="ann-list-title">Posted Announcements</div>
           {% for ann in announcements %}
             <div class="ann-item">
@@ -123,191 +263,103 @@
       </div>
     </div>
 
+    <!-- ── Lab Activity ── -->
+    <div class="card">
+      <div class="card-header">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Lab Activity Summary
+      </div>
 
-    <!-- Lab Activity card -->
-      <div class="card">
-        <div class="card-header">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Lab Activity Summary
+      <div class="stat-strip">
+        <div class="stat-strip-item">
+          <div class="strip-num">{{ stats.total_sitins }}</div>
+          <div class="strip-lbl">Total Sessions</div>
         </div>
-        <div class="card-body" style="padding:0;">
-          <!-- Quick stat strip -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #f0f4f8;">
-            <div style="padding:12px 16px;border-right:1px solid #f0f4f8;">
-              <div style="font-size:1.5rem;font-weight:800;color:#2a5298;">{{ stats.total_sitins }}</div>
-              <div style="font-size:0.68rem;color:#718096;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Total Sessions</div>
-            </div>
-            <div style="padding:12px 16px;">
-              <div style="font-size:1.5rem;font-weight:800;color:#38a169;">{{ stats.currently_in }}</div>
-              <div style="font-size:0.68rem;color:#718096;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Active Now</div>
-            </div>
-          </div>
-          {% if stats.lab_counts %}
-          <div style="padding:12px 16px 6px;">
-            <div style="font-size:0.68rem;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Lab Usage</div>
-            {% set max_lab = stats.lab_counts[0].cnt if stats.lab_counts else 1 %}
-            {% for l in stats.lab_counts %}
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
-              <span style="font-size:0.75rem;font-weight:700;color:#2a5298;min-width:38px;">Lab {{ l.lab }}</span>
-              <div style="flex:1;background:#e2e8f0;border-radius:4px;height:7px;overflow:hidden;">
-                <div style="width:{{ (l.cnt / max_lab * 100)|int }}%;height:100%;background:linear-gradient(90deg,#2a5298,#3b6fd4);border-radius:4px;"></div>
-              </div>
-              <span style="font-size:0.72rem;color:#718096;min-width:18px;text-align:right;">{{ l.cnt }}</span>
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% if stats.purpose_counts %}
-          <div style="padding:6px 16px 12px;border-top:1px solid #f0f4f8;margin-top:4px;">
-            <div style="font-size:0.68rem;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Top Purposes</div>
-            {% set max_p = stats.purpose_counts[0].cnt if stats.purpose_counts else 1 %}
-            {% for p in stats.purpose_counts[:4] %}
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
-              <span style="font-size:0.75rem;font-weight:600;color:#4a5568;min-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ p.purpose }}">{{ p.purpose }}</span>
-              <div style="flex:1;background:#e2e8f0;border-radius:4px;height:7px;overflow:hidden;">
-                <div style="width:{{ (p.cnt / max_p * 100)|int }}%;height:100%;background:linear-gradient(90deg,#38a169,#48bb78);border-radius:4px;"></div>
-              </div>
-              <span style="font-size:0.72rem;color:#718096;min-width:18px;text-align:right;">{{ p.cnt }}</span>
-            </div>
-            {% endfor %}
-            <a href="{{ url_for('sitin_reports') }}" style="display:block;text-align:center;margin-top:8px;font-size:0.75rem;color:#2a5298;font-weight:600;text-decoration:none;">View Full Analytics →</a>
-          </div>
-          {% else %}
-            <p class="no-data" style="padding:18px;">No sit-in data yet.</p>
-          {% endif %}
+        <div class="stat-strip-item">
+          <div class="strip-num green">{{ stats.currently_in }}</div>
+          <div class="strip-lbl">Active Now</div>
         </div>
       </div>
 
-    <!-- Top Students / Leaderboard card -->
-      <div class="card">
-        <div class="card-header">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-          Top Students
-        </div>
-        <div class="card-body" style="padding:10px 14px 14px;">
-          {% if leaderboard %}
-            <div class="leaderboard-list">
-              {% for s in leaderboard[:5] %}
-              <div class="lb-row">
-                <span class="lb-rank">
-                  {% if loop.index == 1 %}🥇
-                  {% elif loop.index == 2 %}🥈
-                  {% elif loop.index == 3 %}🥉
-                  {% else %}{{ loop.index }}{% endif %}
-                </span>
-                <div class="lb-avatar">
-                  {% if s.profile_image %}
-                    <img src="{{ url_for('static', filename='uploads/' + s.profile_image) }}" alt=""/>
-                  {% else %}
-                    {{ s.firstname[0] }}{{ s.lastname[0] }}
-                  {% endif %}
-                </div>
-                <div class="lb-info">
-                  <div class="lb-name">{{ s.firstname }} {{ s.lastname }}</div>
-                  <div class="lb-course">{{ s.course }} · {{ s.idno }}</div>
-                </div>
-                <div class="lb-pts">⭐ {{ s.points }}</div>
-              </div>
-              {% endfor %}
+      <div class="card-body" style="padding:12px 14px 6px;">
+        {% if stats.lab_counts %}
+          <div class="section-label">Lab Usage</div>
+          {% set max_lab = stats.lab_counts[0].cnt if stats.lab_counts else 1 %}
+          {% for l in stats.lab_counts %}
+            <div class="bar-row">
+              <span class="bar-name blue">Lab {{ l.lab }}</span>
+              <div class="bar-track"><div class="bar-fill blue" style="width:{{ (l.cnt / max_lab * 100)|int }}%;"></div></div>
+              <span class="bar-count">{{ l.cnt }}</span>
             </div>
-            <a href="{{ url_for('admin_leaderboard') }}" class="view-all-btn">View Full Leaderboard →</a>
-          {% else %}
-            <div class="no-lb">No points earned yet.<br>Points are awarded automatically.</div>
-            <a href="{{ url_for('admin_leaderboard') }}" class="view-all-btn">View Leaderboard →</a>
-          {% endif %}
-        </div>
+          {% endfor %}
+        {% endif %}
+
+        {% if stats.purpose_counts %}
+          <div class="section-label" style="margin-top:10px;">Top Purposes</div>
+          {% set max_p = stats.purpose_counts[0].cnt if stats.purpose_counts else 1 %}
+          {% for p in stats.purpose_counts[:4] %}
+            <div class="bar-row">
+              <span class="bar-name gray" title="{{ p.purpose }}">{{ p.purpose }}</span>
+              <div class="bar-track"><div class="bar-fill green" style="width:{{ (p.cnt / max_p * 100)|int }}%;"></div></div>
+              <span class="bar-count">{{ p.cnt }}</span>
+            </div>
+          {% endfor %}
+          <a href="{{ url_for('sitin_reports') }}" class="view-link" style="margin-top:10px;margin-bottom:4px;">View Full Analytics →</a>
+        {% else %}
+          <p class="no-data" style="padding:14px 0;">No sit-in data yet.</p>
+        {% endif %}
       </div>
+    </div>
 
+    <!-- ── Top Students ── -->
+    <div class="card">
+      <div class="card-header">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        Top Students
+      </div>
+      <div class="card-body" style="padding:10px 12px 12px;">
+        {% if leaderboard %}
+          {% for s in leaderboard[:5] %}
+            <div class="lb-row">
+              <span class="lb-rank">
+                {% if loop.index == 1 %}🥇
+                {% elif loop.index == 2 %}🥈
+                {% elif loop.index == 3 %}🥉
+                {% else %}{{ loop.index }}{% endif %}
+              </span>
+              <div class="lb-avatar">
+                {% if s.profile_image %}
+                  <img src="{{ url_for('static', filename='uploads/' + s.profile_image) }}" alt=""/>
+                {% else %}
+                  {{ s.firstname[0] }}{{ s.lastname[0] }}
+                {% endif %}
+              </div>
+              <div class="lb-info">
+                <div class="lb-name">{{ s.firstname }} {{ s.lastname }}</div>
+                <div class="lb-course">{{ s.course }} · {{ s.idno }}</div>
+              </div>
+              <div class="lb-pts">⭐ {{ s.points }}</div>
+            </div>
+          {% endfor %}
+          <a href="{{ url_for('admin_leaderboard') }}" class="view-all-btn">View Full Leaderboard →</a>
+        {% else %}
+          <div class="no-lb">No points earned yet.</div>
+          <a href="{{ url_for('admin_leaderboard') }}" class="view-all-btn">View Leaderboard →</a>
+        {% endif %}
+      </div>
+    </div>
 
-  </div><!-- end main grid -->
+  </div><!-- end dash-grid -->
 </div><!-- end admin-page -->
 
-<!-- ── Search Modal ── -->
-<div id="searchModal" class="modal-overlay" style="display:none">
-  <div class="modal">
-    <div class="modal-header"><span>Search Student</span><button onclick="closeSearch()">✕</button></div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Search by ID or Name</label>
-        <input type="text" id="searchInput" class="modal-input" placeholder="Type to search…" oninput="doSearch(this.value)" autocomplete="off"/>
-      </div>
-      <div id="searchResults" class="search-results"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Sit-in Modal ── -->
-<div id="sitinModal" class="modal-overlay" style="display:none">
-  <div class="modal">
-    <div class="modal-header"><span>Sit In Form</span><button onclick="closeSitin()">✕</button></div>
-    <div class="modal-body">
-      <form action="{{ url_for('admin_sitin') }}" method="POST">
-        <div class="form-group"><label>ID Number</label><input type="text" name="idno" id="sitinIdno" class="modal-input" required/></div>
-        <div class="form-group"><label>Student Name</label><input type="text" id="sitinName" class="modal-input" readonly/></div>
-        <div class="form-group">
-          <label>Purpose</label>
-          <select name="purpose" class="modal-input" required>
-            <option value="">-- Select Purpose --</option>
-            <option>C Programming</option><option>Java</option><option>C#</option>
-            <option>ASP.Net</option><option>PHP</option><option>Database</option>
-            <option>Research</option><option>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Lab</label>
-          <select name="lab" class="modal-input" required>
-            <option value="">-- Select Lab --</option>
-            <option>524</option><option>526</option><option>528</option><option>530</option><option>542</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Remaining Session</label><input type="text" id="sitinSession" class="modal-input" readonly/></div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeSitin()">Close</button>
-          <button type="submit" class="btn btn-primary">Sit In</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <script>
-function openSearch() { document.getElementById('searchModal').style.display='flex'; setTimeout(()=>document.getElementById('searchInput').focus(),100); }
-function closeSearch() { document.getElementById('searchModal').style.display='none'; document.getElementById('searchResults').innerHTML=''; document.getElementById('searchInput').value=''; }
-
-function doSearch(q) {
-  const el = document.getElementById('searchResults');
-  if (!q.trim()) { el.innerHTML=''; return; }
-  fetch('/admin/search_student?q='+encodeURIComponent(q))
-    .then(r=>r.json()).then(students=>{
-      if (!students.length) { el.innerHTML='<p class="no-data">No students found.</p>'; return; }
-      el.innerHTML = students.map(s=>`
-        <div class="result-row" onclick="selectStudent('${s.idno}','${s.name}',${s.remaining_session})">
-          <div>
-            <div class="result-name">${s.name}</div>
-            <div class="result-meta">${s.idno} · ${s.course} Year ${s.level}</div>
-          </div>
-          <span class="session-badge">${s.remaining_session} sessions</span>
-          ${s.already_in ? '<span class="in-badge">IN</span>' : ''}
-        </div>`).join('');
-    });
-}
-
-function selectStudent(idno, name, sessions) {
-  closeSearch();
-  document.getElementById('sitinIdno').value    = idno;
-  document.getElementById('sitinName').value    = name;
-  document.getElementById('sitinSession').value = sessions;
-  openSitin();
-}
-
-function openSitin() { document.getElementById('sitinModal').style.display='flex'; }
-function closeSitin() { document.getElementById('sitinModal').style.display='none'; }
-
-['searchModal','sitinModal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id) document.getElementById(id).style.display='none'; });
-});
-
 setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); }, 5000);
+
+(function(){
+  if (localStorage.getItem('adminDark') === '1') {
+    document.body.classList.add('dark');
+  }
+})();
 </script>
 </body>
 </html>

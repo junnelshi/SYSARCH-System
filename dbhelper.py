@@ -686,6 +686,109 @@ def get_reserved_pcs(lab, date):
     return [r['pc_number'] for r in rows]
 
 
+
+
+def get_testimonials(limit=10):
+    """Get approved/public feedback as testimonials."""
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT f.*, st.firstname, st.lastname, st.course, st.profile_image
+        FROM feedback f
+        JOIN students st ON f.idno = st.idno
+        WHERE f.rating >= 4
+        ORDER BY f.rating DESC, f.created_at DESC
+        LIMIT ?
+    """, (limit,))
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_ai_recommendations(idno):
+    """Generate simple rule-based AI recommendations for a student."""
+    conn = connect()
+    cur  = conn.cursor()
+    # Most used lab
+    cur.execute("""
+        SELECT lab, COUNT(*) as cnt FROM sit_in_records
+        WHERE idno = ? GROUP BY lab ORDER BY cnt DESC LIMIT 1
+    """, (idno,))
+    fav_lab = cur.fetchone()
+    # Most used purpose
+    cur.execute("""
+        SELECT purpose, COUNT(*) as cnt FROM sit_in_records
+        WHERE idno = ? GROUP BY purpose ORDER BY cnt DESC LIMIT 1
+    """, (idno,))
+    fav_purpose = cur.fetchone()
+    # Avg session duration
+    cur.execute("""
+        SELECT ROUND(AVG((strftime('%s',logout_time)-strftime('%s',login_time))/60.0),1) as avg_mins
+        FROM sit_in_records WHERE idno = ?
+    """, (idno,))
+    avg_row = cur.fetchone()
+    # Busiest day
+    cur.execute("""
+        SELECT strftime('%w', login_time) as dow, COUNT(*) as cnt
+        FROM sit_in_records WHERE idno = ?
+        GROUP BY dow ORDER BY cnt DESC LIMIT 1
+    """, (idno,))
+    busy_day = cur.fetchone()
+    conn.close()
+
+    days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+    recs = []
+
+    if fav_lab:
+        recs.append({
+            'icon': '🏫',
+            'title': f'Your preferred lab is Lab {fav_lab["lab"]}',
+            'tip': f'You visit Lab {fav_lab["lab"]} most often ({fav_lab["cnt"]} times). Consider reserving your usual seat in advance.'
+        })
+    if fav_purpose:
+        recs.append({
+            'icon': '💻',
+            'title': f'You mostly work on {fav_purpose["purpose"]}',
+            'tip': f'Check the Software page for tools related to {fav_purpose["purpose"]} that the admin has uploaded for download.'
+        })
+    if avg_row and avg_row['avg_mins']:
+        avg = float(avg_row['avg_mins'])
+        if avg < 30:
+            recs.append({'icon': '⏱', 'title': 'Short sessions detected',
+                'tip': 'Your average session is under 30 minutes. Consider booking longer slots to maximize your lab time.'})
+        else:
+            recs.append({'icon': '⏱', 'title': f'Good session length: {avg} min avg',
+                'tip': 'You make good use of your lab time. Keep it up!'})
+    if busy_day:
+        day_name = days[int(busy_day['dow'])]
+        recs.append({'icon': '📅', 'title': f'You are most active on {day_name}s',
+            'tip': f'Labs tend to be busier on {day_name}s. Try reserving your PC early to guarantee your spot.'})
+    if not recs:
+        recs.append({'icon': '💡', 'title': 'Start using the lab!',
+            'tip': 'No sit-in data yet. Visit the lab and start logging sessions to get personalized recommendations.'})
+    return recs
+
+
+def get_calendar_reservations(lab, year, month):
+    """Get all reservations for a lab in a given month for calendar view."""
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute("""
+        SELECT r.date, r.time_slot, r.pc_number, r.status, r.purpose,
+               st.firstname, st.lastname, r.idno
+        FROM reservations r
+        JOIN students st ON r.idno = st.idno
+        WHERE r.lab = ?
+          AND strftime('%Y', r.date) = ?
+          AND strftime('%m', r.date) = ?
+          AND r.status IN ('pending','approved')
+        ORDER BY r.date, r.time_slot
+    """, (lab, str(year), str(month).zfill(2)))
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 # ── Notifications ─────────────────────────────────────────────────────────────
 
 def get_student_notifications(idno):

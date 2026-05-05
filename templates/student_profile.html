@@ -354,6 +354,7 @@
     <a href="#" class="nav-btn" onclick="showTab('myreservations');return false;">My Reservations</a>
     <a href="#" class="nav-btn" onclick="showTab('reserve');return false;">Reserve</a>
     <a href="#" class="nav-btn" onclick="showTab('feedback');return false;">Feedback</a>
+    <a href="#" class="nav-btn" onclick="showTab('ai-recs');return false;">AI Tips</a>
 
     <!-- Notification Bell -->
     <div class="notif-bell-wrap">
@@ -441,7 +442,7 @@
 
       <div class="student-info-body">
         <div class="student-name">{{ session.get('student_firstname') }} {{ session.get('student_lastname') }}</div>
-        <div class="student-course-tag">{{ session.get('student_course') }} — Year {{ session.get('student_level') }}</div>
+        <div class="student-course-tag">{{ session.get('student_course') }} Year {{ session.get('student_level') }}</div>
         <div class="info-divider"></div>
         <div class="info-row">
           <span class="info-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></span>
@@ -862,6 +863,38 @@
             </div>
             <button type="submit" class="btn-submit green" style="margin-top:8px;">Submit Feedback (+2 pts)</button>
           </form>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── AI Recommendations ── -->
+    <div id="tab-ai-recs" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          AI Recommendations
+        </div>
+        <div class="card-body">
+          <p style="font-size:0.82rem;color:#718096;margin-bottom:16px;">Personalized tips based on your sit-in history and usage patterns.</p>
+          {% if ai_recs %}
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              {% for rec in ai_recs %}
+              <div style="background:#f7fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;">
+                <div style="font-size:1.4rem;flex-shrink:0;line-height:1;">{{ rec.icon }}</div>
+                <div>
+                  <div style="font-size:0.88rem;font-weight:700;color:#1a202c;margin-bottom:4px;">{{ rec.title }}</div>
+                  <div style="font-size:0.82rem;color:#4a5568;line-height:1.6;">{{ rec.tip }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="no-data">No recommendations yet. Start using the lab to get personalized tips!</p>
+          {% endif %}
+          <div style="margin-top:16px;padding:12px 14px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;font-size:0.75rem;color:#1d4ed8;">
+            💡 Recommendations update automatically based on your sit-in history, preferred labs, and session patterns.
+          </div>
         </div>
       </div>
     </div>

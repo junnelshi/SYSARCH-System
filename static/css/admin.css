@@ -240,3 +240,166 @@ a { text-decoration: none; }
 
 /* ── Misc ────────────────────────────────────────────────── */
 .text-muted { color: #a0aec0; }
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE  — toggled via body.dark (set by toggleAdminDark)
+   ══════════════════════════════════════════════════════════ */
+
+body.dark {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* ── Navbar (stays dark, just slightly different) ── */
+body.dark .admin-navbar {
+  background: linear-gradient(90deg, #0d1f3c 0%, #1a3560 100%);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+
+/* ── Cards ── */
+body.dark .card,
+body.dark .modal,
+body.dark .summary-box {
+  background: #1e293b;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ── Page heading ── */
+body.dark .page-heading { color: #f1f5f9; }
+
+/* ── Summary boxes ── */
+body.dark .summary-num { color: #f1f5f9; }
+body.dark .summary-lbl { color: #94a3b8; }
+body.dark .summary-icon.blue   { background: #1e3a5f; }
+body.dark .summary-icon.green  { background: #14532d; }
+body.dark .summary-icon.orange { background: #451a03; }
+
+/* ── Tables ── */
+body.dark .data-table thead tr { background: #1a2744; }
+body.dark .data-table th { color: #94a3b8; border-bottom-color: #334155; }
+body.dark .data-table td { color: #cbd5e1; border-bottom-color: #1e293b; }
+body.dark .data-table tbody tr:hover { background: #1a2744; }
+body.dark .table-search-input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+body.dark .table-search-input:focus { border-color: #3b82f6; }
+body.dark .entries-select { color: #94a3b8; }
+body.dark .entries-select select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+/* ── Stat items ── */
+body.dark .stat-item { border-bottom-color: #1e293b; }
+body.dark .stat-label { color: #94a3b8; }
+body.dark .stat-value { color: #60a5fa; }
+
+/* ── Announcements ── */
+body.dark .ann-textarea {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+body.dark .ann-textarea:focus { border-color: #3b82f6; }
+body.dark .ann-item { border-bottom-color: #1e293b; }
+body.dark .ann-body { color: #94a3b8; }
+body.dark .ann-delete {
+  background: #2d1515;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+body.dark .ann-delete:hover { background: #e53e3e; color: #fff; }
+
+/* ── Modals ── */
+body.dark .modal { background: #1e293b; }
+body.dark .modal-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+body.dark .modal-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+body.dark .modal-input[readonly] { background: #0d1525; color: #64748b; }
+body.dark .modal-actions { border-top-color: #334155; }
+body.dark .form-group label { color: #94a3b8; }
+body.dark .hint { color: #64748b; }
+
+/* ── Search results ── */
+body.dark .result-row {
+  border-color: #334155;
+  background: #0f172a;
+}
+body.dark .result-row:hover { background: #1e3a5f; border-color: #3b82f6; }
+body.dark .result-name { color: #f1f5f9; }
+body.dark .result-meta { color: #64748b; }
+
+/* ── Flash messages ── */
+body.dark .flash-success { background: #14532d; border-left-color: #22c55e; color: #bbf7d0; }
+body.dark .flash-error   { background: #450a0a; border-left-color: #ef4444; color: #fecaca; }
+body.dark .flash-info    { background: #0c2a4a; border-left-color: #3b82f6; color: #bfdbfe; }
+
+/* ── Buttons ── */
+body.dark .btn-secondary { background: #334155; }
+body.dark .btn-secondary:hover { background: #475569; }
+
+/* ── Calendar specific ── */
+body.dark .cal-card,
+body.dark .detail-panel {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark .cal-head {
+  background: #1a2744;
+  color: #64748b;
+  border-bottom-color: #334155;
+}
+body.dark .cal-cell {
+  background: #1e293b;
+  border-color: #334155;
+}
+body.dark .cal-cell:hover { background: #1a2f50; }
+body.dark .cal-cell.empty { background: #171f2e; }
+body.dark .cal-cell.empty:hover { background: #171f2e; }
+body.dark .cal-cell.today { background: #0c2a4a; }
+body.dark .cal-cell.today:hover { background: #1e3a5f; }
+body.dark .cal-day { color: #94a3b8; }
+body.dark .detail-table th {
+  background: #1a2744;
+  color: #64748b;
+  border-bottom-color: #334155;
+}
+body.dark .detail-table td {
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+body.dark .detail-table tr:last-child td { border-bottom: none; }
+body.dark .pc-chip {
+  background: #1e3a5f;
+  color: #93c5fd;
+  border-color: #2563eb;
+}
+body.dark .empty-detail { color: #475569; }
+
+/* ── Lab tabs & nav buttons (calendar toolbar) ── */
+body.dark .lab-tab {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+body.dark .lab-tab.active,
+body.dark .lab-tab:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+body.dark .nav-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+body.dark .nav-btn:hover { border-color: #3b82f6; color: #60a5fa; }
+body.dark .month-label { color: #f1f5f9; }
+body.dark .page-title { color: #f1f5f9; }
+body.dark .more-chip { color: #64748b; }

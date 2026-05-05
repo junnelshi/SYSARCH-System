@@ -43,6 +43,9 @@ from dbhelper import (
     get_all_software,
     add_software,
     delete_software,
+    get_testimonials,
+    get_ai_recommendations,
+    get_calendar_reservations,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -169,10 +172,12 @@ def dashboard():
         stats         = get_sitin_stats()
         announcements = get_all_announcements()
         leaderboard   = get_leaderboard()
+        testimonials = get_testimonials(6)
         return render_template('admin_dashboard.html',
                                stats=stats,
                                announcements=announcements,
-                               leaderboard=leaderboard)
+                               leaderboard=leaderboard,
+                               testimonials=testimonials)
     # Student dashboard
     student       = get_student_by_idno(session['student_id'])
     announcements = get_all_announcements()
@@ -182,9 +187,10 @@ def dashboard():
     unread_count  = get_unread_count(session['student_id'])
     # Convert sqlite3.Row objects → plain dicts so tojson works in the template
     notifications = [dict(n) for n in notifications_raw]
-    sitin_summary   = get_student_sitin_summary(session['student_id'])
-    sessions_table  = get_student_sessions_table(session['student_id'])
-    reservation_on  = get_reservation_setting()
+    sitin_summary    = get_student_sitin_summary(session['student_id'])
+    sessions_table   = get_student_sessions_table(session['student_id'])
+    reservation_on   = get_reservation_setting()
+    ai_recs          = get_ai_recommendations(session['student_id'])
     return render_template('student_profile.html',
                            student=student,
                            announcements=announcements,
@@ -194,7 +200,8 @@ def dashboard():
                            unread_count=unread_count,
                            sitin_summary=sitin_summary,
                            sessions_table=sessions_table,
-                           reservation_on=reservation_on)
+                           reservation_on=reservation_on,
+                           ai_recs=ai_recs)
 
 # ── Admin: Announcements ──────────────────────────────────────────────────────
 
@@ -727,6 +734,40 @@ def student_software():
     if rr: return rr
     software = get_all_software()
     return jsonify(software)
+
+
+# ── Admin: PC Calendar ────────────────────────────────────────────────────────
+
+@app.route('/admin/calendar')
+def admin_calendar():
+    r = admin_required()
+    if r: return r
+    import calendar as cal_mod
+    from datetime import datetime, date
+    lab   = request.args.get('lab', '524')
+    year  = int(request.args.get('year',  datetime.now().year))
+    month = int(request.args.get('month', datetime.now().month))
+    reservations     = get_calendar_reservations(lab, year, month)
+    first_weekday    = cal_mod.monthrange(year, month)[0]  # 0=Mon, need Sun=0
+    first_weekday    = (first_weekday + 1) % 7             # convert to Sun-based
+    total_days       = cal_mod.monthrange(year, month)[1]
+    today_str        = date.today().strftime('%Y-%m-%d')
+    return render_template('admin_calendar.html',
+                           lab=lab, year=year, month=month,
+                           reservations=reservations,
+                           first_day_offset=first_weekday,
+                           total_days=total_days,
+                           today_str=today_str)
+
+
+# ── Student: AI Recommendations (AJAX refresh) ────────────────────────────────
+
+@app.route('/student/ai_recommendations')
+def student_ai_recs():
+    rr = login_required()
+    if rr: return rr
+    recs = get_ai_recommendations(session['student_id'])
+    return jsonify(recs)
 
 
 if __name__ == '__main__':

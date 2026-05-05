@@ -12,7 +12,10 @@
     <a href="{{ url_for('admin_reservations') }}"   class="nav-link {{ 'active' if active=='reservation' }}">Reservations</a>
     <a href="{{ url_for('admin_leaderboard') }}"    class="nav-link {{ 'active' if active=='leaderboard' }}">Leaderboard</a>
     <a href="{{ url_for('admin_software') }}"       class="nav-link {{ 'active' if active=='software' }}">Software</a>
+    <a href="{{ url_for('admin_calendar') }}"       class="nav-link {{ 'active' if active=='calendar' }}">Calendar</a>
     <a href="{{ url_for('logout') }}"               class="nav-logout">Log out</a>
+    <button onclick="toggleAdminDark()" class="admin-dark-btn" title="Toggle Dark Mode"
+      style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:0.9rem;margin-left:4px;">🌙</button>
   </div>
 </nav>
 
@@ -132,6 +135,20 @@ function lookupStudent(val) {
       });
   }, 400);
 }
+
+// Dark mode for all admin pages
+function toggleAdminDark() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('adminDark', isDark ? '1' : '0');
+  const btns = document.querySelectorAll('.admin-dark-btn');
+  btns.forEach(b => b.textContent = isDark ? '☀️' : '🌙');
+}
+(function(){
+  if (localStorage.getItem('adminDark') === '1') {
+    document.body.classList.add('dark');
+    document.querySelectorAll('.admin-dark-btn').forEach(b => b.textContent = '☀️');
+  }
+})();
 
 ['searchModal','sitinModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id) document.getElementById(id).style.display='none'; });

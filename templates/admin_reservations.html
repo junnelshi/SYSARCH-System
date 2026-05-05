@@ -81,20 +81,17 @@
   <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
     <div class="page-title">Lab Reservations</div>
     <form action="{{ url_for('toggle_reservation') }}" method="POST">
-      <button type="submit" class="btn {% if reservation_on %}btn-danger{% else %}btn-success{% endif %} btn-sm"
-        onclick="return confirm('{% if reservation_on %}Disable{% else %}Enable{% endif %} reservations for all students?')"
-        style="display:inline-flex;align-items:center;gap:6px;">
-        {% if reservation_on %}
-          🔒 Disable Reservations
-        {% else %}
-          🔓 Enable Reservations
-        {% endif %}
+      <button type="submit"
+        onclick="return confirm('{% if reservation_on %}Disable{% else %}Enable{% endif %} reservations?')"
+        style="padding:4px 10px;font-size:0.72rem;font-weight:600;border-radius:5px;border:1px solid;cursor:pointer;font-family:'Inter',sans-serif;
+               {% if reservation_on %}background:#fff5f5;color:#c53030;border-color:#feb2b2;{% else %}background:#f0fff4;color:#276749;border-color:#9ae6b4;{% endif %}">
+        {% if reservation_on %}Disable Reservations{% else %}Enable Reservations{% endif %}
       </button>
     </form>
   </div>
   {% if not reservation_on %}
   <div style="background:#fff5f5;border:1.5px solid #fed7d7;border-radius:10px;padding:12px 18px;color:#742a2a;font-size:0.88rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-    🚫 Reservations are currently <strong>DISABLED</strong> for all students.
+    🚫 Reservations are currently <strong>DISABLED.</strong>
   </div>
   {% endif %}
 
