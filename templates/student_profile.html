@@ -876,7 +876,6 @@
           AI Recommendations
         </div>
         <div class="card-body">
-          <p style="font-size:0.82rem;color:#718096;margin-bottom:16px;">Personalized tips based on your sit-in history and usage patterns.</p>
           {% if ai_recs %}
             <div style="display:flex;flex-direction:column;gap:12px;">
               {% for rec in ai_recs %}
@@ -890,11 +889,8 @@
               {% endfor %}
             </div>
           {% else %}
-            <p class="no-data">No recommendations yet. Start using the lab to get personalized tips!</p>
+            <p class="no-data">No recommendations yet.</p>
           {% endif %}
-          <div style="margin-top:16px;padding:12px 14px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;font-size:0.75rem;color:#1d4ed8;">
-            💡 Recommendations update automatically based on your sit-in history, preferred labs, and session patterns.
-          </div>
         </div>
       </div>
     </div>
