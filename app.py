@@ -12,6 +12,7 @@ from dbhelper import (
     deleterecord,
     reset_all_sessions,
     get_active_sitin,
+    get_active_sitin_detail,
     is_student_sitting_in,
     sitin_student,
     logout_student,
@@ -417,6 +418,28 @@ def admin_leaderboard():
     leaderboard = get_leaderboard()
     return render_template('leaderboard.html', leaderboard=leaderboard)
 
+
+# ── Admin: PC Control Panel ───────────────────────────────────────────────────
+
+@app.route('/admin/pc_control')
+def pc_control():
+    r = admin_required()
+    if r: return r
+    active_sitins = get_active_sitin_detail()
+    all_students  = get_all_students()
+    return render_template('admin_pc_control.html',
+                           active_sitins=active_sitins,
+                           all_students=all_students)
+
+
+@app.route('/admin/pc_control/data')
+def pc_control_data():
+    """AJAX endpoint — returns live sit-in data for auto-refresh."""
+    r = admin_required()
+    if r: return r
+    active_sitins = get_active_sitin_detail()
+    return jsonify(active_sitins)
+
 # ── Admin: Sit-in records ─────────────────────────────────────────────────────
 
 @app.route('/admin/sitin_records')
@@ -643,27 +666,55 @@ def reserved_pcs():
 def export_csv():
     r = admin_required()
     if r: return r
-    import csv, io
+    import io
     from flask import Response
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill
     records = get_sitin_records()
-    output  = io.StringIO()
-    # Use tab delimiter so Excel doesn't auto-format dates as numbers
-    writer  = csv.writer(output)
-    writer.writerow(['#','ID Number','Name','Course','Purpose','Lab','Login Time','Logout Time'])
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "sitin_records"
+
+    # Header row
+    headers = ['#', 'ID Number', 'Name', 'Course', 'Purpose', 'Lab', 'Login Time', 'Logout Time']
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill(start_color="2A5298", end_color="2A5298", fill_type="solid")
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+
+    # Data rows
     for i, rec in enumerate(records, 1):
-        # Prefix datetime strings with a tab to force Excel to treat as text
         login  = str(rec['login_time'])  if rec['login_time']  else ''
         logout = str(rec['logout_time']) if rec['logout_time'] else ''
-        writer.writerow([i, str(rec['idno']),
-                         f"{rec['firstname']} {rec['lastname']}",
-                         rec['course'], rec['purpose'], rec['lab'],
-                         login, logout])
+        row = [i, str(rec['idno']),
+               f"{rec['firstname']} {rec['lastname']}",
+               rec['course'], rec['purpose'], str(rec['lab']),
+               login, logout]
+        ws.append(row)
+
+    # Auto-fit column widths
+    for col_idx, header in enumerate(headers, 1):
+        max_len = len(str(header))
+        for row in ws.iter_rows(min_row=2, min_col=col_idx, max_col=col_idx):
+            for cell in row:
+                if cell.value:
+                    max_len = max(max_len, len(str(cell.value)))
+        ws.column_dimensions[ws.cell(row=1, column=col_idx).column_letter].width = max_len + 4
+
+    # Write to bytes
+    output = io.BytesIO()
+    wb.save(output)
     output.seek(0)
-    # BOM so Excel opens with correct encoding and treats text as text
-    bom    = u'\ufeff'
-    final  = io.StringIO(bom + output.getvalue())
-    return Response(final, mimetype='text/csv; charset=utf-8-sig',
-                    headers={'Content-Disposition': 'attachment;filename=sitin_records.csv'})
+
+    return Response(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        headers={'Content-Disposition': 'attachment;filename=sitin_records.xlsx'}
+    )
 
 
 @app.route('/admin/reports/pdf')

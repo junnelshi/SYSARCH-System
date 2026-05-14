@@ -7,9 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
   <style>
-    .page-wrap { max-width: 1300px; margin: 0 auto; padding: 24px; }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    .page-title  { font-size: 1.2rem; font-weight: 800; color: #1a202c; }
     .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.07); overflow: hidden; margin-bottom: 24px; }
     .card-header-bar { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .card-title { font-size: 0.92rem; font-weight: 700; color: #1a202c; display: flex; align-items: center; gap: 8px; }
@@ -30,14 +28,12 @@
     .badge-rejected { background: #fed7d7; color: #742a2a; } .badge-rejected::before { background: #e53e3e; }
 
     .pc-chip { display: inline-flex; align-items: center; gap: 4px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; }
-    .btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: 7px; font-size: 0.78rem; font-weight: 600; font-family: 'Inter',sans-serif; cursor: pointer; border: none; text-decoration: none; transition: all .15s; }
-    .btn-approve { background: #c6f6d5; color: #22543d; }
-    .btn-approve:hover { background: #9ae6b4; }
-    .btn-reject  { background: #fed7d7; color: #742a2a; }
-    .btn-reject:hover  { background: #feb2b2; }
+    .btn-action { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: 7px; font-size: 0.78rem; font-weight: 600; font-family: 'Inter',sans-serif; cursor: pointer; border: none; text-decoration: none; transition: all .15s; }
+    .btn-approve { background: #c6f6d5; color: #22543d; } .btn-approve:hover { background: #9ae6b4; }
+    .btn-reject  { background: #fed7d7; color: #742a2a; } .btn-reject:hover  { background: #feb2b2; }
     .actions-cell { display: flex; gap: 6px; }
 
-    /* Lab grid panel */
+    /* Lab grid */
     .lab-overview { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
     @media(max-width:1100px){ .lab-overview{ grid-template-columns: repeat(3,1fr); } }
     @media(max-width:700px) { .lab-overview{ grid-template-columns: repeat(2,1fr); } }
@@ -45,59 +41,63 @@
     .lab-grid-title { font-size: 0.78rem; font-weight: 700; color: #1a202c; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
     .lab-grid-title span { font-size: 0.68rem; color: #718096; font-weight: 400; }
     .mini-pc-grid { display: grid; grid-template-columns: repeat(10,1fr); gap: 3px; }
-    .mini-pc { width:100%; aspect-ratio:1; border-radius: 3px; border: 1px solid; display: flex; align-items: center; justify-content: center; font-size: 0.45rem; font-weight: 700; cursor: default; }
+    .mini-pc { width:100%; aspect-ratio:1; border-radius: 3px; border: 1px solid; display: flex; align-items: center; justify-content: center; font-size: 0.45rem; font-weight: 700; }
     .mini-pc.available { background: #f0fff4; border-color: #9ae6b4; color: #22543d; }
     .mini-pc.reserved  { background: #fff5f5; border-color: #feb2b2; color: #742a2a; }
     .mini-pc.pending   { background: #fffff0; border-color: #faf089; color: #744210; }
-    .lab-legend { display: flex; gap: 10px; margin-top: 10px; }
+    .lab-legend { display: flex; gap: 10px; margin-top: 6px; }
     .leg-item { display: flex; align-items: center; gap: 4px; font-size: 0.68rem; color: #718096; }
     .leg-dot  { width: 7px; height: 7px; border-radius: 50%; }
-
-    .flash-wrap { max-width: 1300px; margin: 16px auto 0; padding: 0 24px; }
-    .flash { display: flex; align-items: center; justify-content: space-between; padding: 11px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; margin-bottom: 8px; }
-    .flash button { background: none; border: none; cursor: pointer; opacity: .5; }
-    .flash-success { background: #c6f6d5; border-left: 4px solid #38a169; color: #22543d; }
-    .flash-error   { background: #fed7d7; border-left: 4px solid #e53e3e; color: #742a2a; }
-
     .empty { text-align: center; padding: 40px; color: #a0aec0; font-size: 0.88rem; }
+
+    /* Dark mode */
+    body.dark .card, body.dark .lab-grid-card { background: #1e293b; }
+    body.dark .res-table th { background: #1a2744; color: #94a3b8; border-color: #334155; }
+    body.dark .res-table td { color: #cbd5e1; border-color: #334155; }
+    body.dark .res-table tr:hover td { background: #1a2744; }
+    body.dark .card-header-bar { border-color: #334155; }
+    body.dark .card-title { color: #f1f5f9; }
+    body.dark .filter-btn { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    body.dark .lab-grid-title { color: #f1f5f9; }
   </style>
 </head>
 <body>
 {% from 'macros.html' import admin_nav %}
-
 {{ admin_nav('reservation') }}
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flash-wrap">
-      {% for category, message in messages %}
-        <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
+<div class="admin-page">
 
-<div class="page-wrap">
-  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-    <div class="page-title">Lab Reservations</div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="page-header">
+    <div class="page-heading" style="margin:0;">Lab Reservations</div>
     <form action="{{ url_for('toggle_reservation') }}" method="POST">
       <button type="submit"
         onclick="return confirm('{% if reservation_on %}Disable{% else %}Enable{% endif %} reservations?')"
-        style="padding:4px 10px;font-size:0.72rem;font-weight:600;border-radius:5px;border:1px solid;cursor:pointer;font-family:'Inter',sans-serif;
+        style="padding:5px 12px;font-size:0.75rem;font-weight:600;border-radius:6px;border:1.5px solid;cursor:pointer;font-family:'Inter',sans-serif;
                {% if reservation_on %}background:#fff5f5;color:#c53030;border-color:#feb2b2;{% else %}background:#f0fff4;color:#276749;border-color:#9ae6b4;{% endif %}">
         {% if reservation_on %}Disable Reservations{% else %}Enable Reservations{% endif %}
       </button>
     </form>
   </div>
+
   {% if not reservation_on %}
-  <div style="background:#fff5f5;border:1.5px solid #fed7d7;border-radius:10px;padding:12px 18px;color:#742a2a;font-size:0.88rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+  <div style="background:#fff5f5;border:1.5px solid #fed7d7;border-radius:10px;padding:12px 18px;color:#742a2a;font-size:0.85rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
     🚫 Reservations are currently <strong>DISABLED.</strong>
   </div>
   {% endif %}
 
   <!-- Lab PC Availability Overview -->
   {% set labs = ['524','526','528','530','542'] %}
-  <div style="font-size:0.78rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">
+  <div style="font-size:0.72rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">
     PC Availability Overview (Today / Pending &amp; Approved)
   </div>
   <div class="lab-overview">
@@ -118,16 +118,13 @@
         </div>
         <div class="mini-pc-grid">
           {% for i in range(1,21) %}
-            {% if i in taken_pcs %}
-              <div class="mini-pc reserved" title="PC-{{ '%02d'|format(i) }} Reserved">{{ '%02d'|format(i) }}</div>
-            {% elif i in pending_pcs %}
-              <div class="mini-pc pending" title="PC-{{ '%02d'|format(i) }} Pending">{{ '%02d'|format(i) }}</div>
-            {% else %}
-              <div class="mini-pc available" title="PC-{{ '%02d'|format(i) }} Available">{{ '%02d'|format(i) }}</div>
+            {% if i in taken_pcs %}<div class="mini-pc reserved" title="PC-{{ '%02d'|format(i) }} Reserved">{{ '%02d'|format(i) }}</div>
+            {% elif i in pending_pcs %}<div class="mini-pc pending" title="PC-{{ '%02d'|format(i) }} Pending">{{ '%02d'|format(i) }}</div>
+            {% else %}<div class="mini-pc available" title="PC-{{ '%02d'|format(i) }} Available">{{ '%02d'|format(i) }}</div>
             {% endif %}
           {% endfor %}
         </div>
-        <div class="lab-legend" style="margin-top:6px;">
+        <div class="lab-legend">
           <div class="leg-item"><span class="leg-dot" style="background:#9ae6b4;"></span> Available</div>
           <div class="leg-item"><span class="leg-dot" style="background:#feb2b2;"></span> Reserved</div>
           <div class="leg-item"><span class="leg-dot" style="background:#faf089;"></span> Pending</div>
@@ -155,14 +152,8 @@
       <table class="res-table" id="resTable">
         <thead>
           <tr>
-            <th>Student</th>
-            <th>Lab</th>
-            <th>PC</th>
-            <th>Date</th>
-            <th>Time Slot</th>
-            <th>Purpose</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th>Student</th><th>Lab</th><th>PC</th><th>Date</th>
+            <th>Time Slot</th><th>Purpose</th><th>Status</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -187,9 +178,9 @@
             <td>
               {% if r.status == 'pending' %}
               <div class="actions-cell">
-                <a href="{{ url_for('update_reservation', res_id=r.id, status='approved') }}" class="btn btn-approve"
+                <a href="{{ url_for('update_reservation', res_id=r.id, status='approved') }}" class="btn-action btn-approve"
                    onclick="return confirm('Approve this reservation?')">✓ Approve</a>
-                <a href="{{ url_for('update_reservation', res_id=r.id, status='rejected') }}" class="btn btn-reject"
+                <a href="{{ url_for('update_reservation', res_id=r.id, status='rejected') }}" class="btn-action btn-reject"
                    onclick="return confirm('Reject this reservation?')">✕ Reject</a>
               </div>
               {% else %}
@@ -205,7 +196,9 @@
       <div class="empty">No reservations submitted yet.</div>
     {% endif %}
   </div>
-</div>
+
+</div><!-- end admin-page -->
+</div><!-- end admin-main-content -->
 
 <script>
 function filterStatus(status, btn) {
@@ -217,6 +210,5 @@ function filterStatus(status, btn) {
 }
 setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); },5000);
 </script>
-
 </body>
 </html>

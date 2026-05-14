@@ -4,267 +4,56 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PC Calendar — CCS Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: #f0f2f5;
-    }
-
-    .page-wrap {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 20px 16px;
-    }
-
-    .page-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 14px;
-      letter-spacing: -0.01em;
-    }
-
-    /* ── Toolbar ── */
-    .cal-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .lab-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-
-    .lab-tab {
-      padding: 4px 12px;
-      border-radius: 5px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border: 1.5px solid #cbd5e1;
-      background: #fff;
-      color: #64748b;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: all .12s;
-      text-decoration: none;
-      line-height: 1.6;
-    }
-    .lab-tab.active, .lab-tab:hover {
-      background: #1e40af;
-      color: #fff;
-      border-color: #1e40af;
-    }
-
-    .month-nav {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: auto;
-    }
-
-    .month-label {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #1e293b;
-      min-width: 110px;
-      text-align: center;
-    }
-
-    .nav-btn {
-      padding: 4px 10px;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 5px;
-      background: #fff;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      color: #475569;
-      transition: all .12s;
-      text-decoration: none;
-      line-height: 1.6;
-    }
-    .nav-btn:hover { border-color: #1e40af; color: #1e40af; }
-
-    /* ── Calendar card ── */
-    .cal-card {
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
-    }
-
-    /* ── Grid ── */
-    .cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-    }
-
-    .cal-head {
-      text-align: center;
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      padding: 8px 2px;
-      border-bottom: 1px solid #e2e8f0;
-      background: #f8fafc;
-    }
-
-    .cal-cell {
-      min-height: 64px;
-      padding: 5px 5px 4px;
-      border-right: 1px solid #f1f5f9;
-      border-bottom: 1px solid #f1f5f9;
-      cursor: pointer;
-      transition: background .1s;
-      position: relative;
-      vertical-align: top;
-    }
-
-    /* Remove right border on last column */
-    .cal-cell:nth-child(7n) { border-right: none; }
-
-    .cal-cell:hover { background: #f0f6ff; }
-    .cal-cell.empty { background: #fafafa; cursor: default; }
-    .cal-cell.empty:hover { background: #fafafa; }
-    .cal-cell.today { background: #eff6ff; }
-    .cal-cell.today:hover { background: #dbeafe; }
-
-    .cal-day {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #64748b;
-      margin-bottom: 3px;
-      line-height: 1;
-    }
-    .cal-cell.today .cal-day {
-      color: #fff;
-      background: #1e40af;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.65rem;
-    }
-
-    .booking-chip {
-      display: block;
-      font-size: 0.58rem;
-      font-weight: 600;
-      border-radius: 3px;
-      padding: 1px 4px;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .chip-approved { background: #dcfce7; color: #166534; }
-    .chip-pending  { background: #fef9c3; color: #854d0e; }
-
-    .more-chip {
-      font-size: 0.55rem;
-      color: #94a3b8;
-      font-weight: 600;
-    }
-
-    /* ── Detail panel ── */
-    .detail-panel {
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      overflow: hidden;
-      margin-top: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.06);
-    }
-
-    .detail-header {
-      background: #1e40af;
-      color: #fff;
-      padding: 9px 14px;
-      font-size: 0.78rem;
-      font-weight: 700;
-    }
-
-    .detail-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-    }
-    .detail-table th {
-      background: #f8fafc;
-      padding: 7px 12px;
-      text-align: left;
-      font-size: 0.62rem;
-      font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .detail-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid #f1f5f9;
-      color: #334155;
-    }
-    .detail-table tr:last-child td { border-bottom: none; }
-
-    .badge {
-      display: inline-block;
-      border-radius: 20px;
-      padding: 2px 8px;
-      font-size: 0.65rem;
-      font-weight: 700;
-    }
-    .badge-approved { background: #dcfce7; color: #166534; }
-    .badge-pending  { background: #fef9c3; color: #854d0e; }
-
-    .pc-chip {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      font-family: 'DM Mono', monospace;
-    }
-
-    .empty-detail {
-      text-align: center;
-      padding: 20px;
-      color: #94a3b8;
-      font-size: 0.78rem;
-    }
-
-    .sub-text {
-      font-size: 0.65rem;
-      color: #94a3b8;
-      display: block;
-    }
-
-    /* Flash messages */
-    .flash-wrap { max-width: 860px; margin: 14px auto 0; padding: 0 16px; }
-    .flash {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 9px 14px;
-      border-radius: 7px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-    .flash button { background: none; border: none; cursor: pointer; opacity: .5; }
-    .flash-info { background: #dbeafe; border-left: 3px solid #3b82f6; color: #1e3a5f; }
+    .page-wrap{max-width:1100px;margin:0 auto;padding:20px 24px;}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+    .toolbar-left{display:flex;align-items:center;gap:8px;}
+    .month-label{font-size:1.1rem;font-weight:700;color:#1a202c;min-width:150px;}
+    .icon-btn{width:30px;height:30px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:#4a5568;text-decoration:none;transition:all .15s;}
+    .icon-btn:hover{background:#f7fafc;border-color:#cbd5e0;}
+    .today-btn{padding:4px 12px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;font-size:0.78rem;font-weight:600;color:#4a5568;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;}
+    .today-btn:hover{background:#f7fafc;}
+    .lab-tabs{display:flex;gap:4px;}
+    .lab-tab{padding:5px 12px;border-radius:6px;font-size:0.78rem;font-weight:600;border:1px solid #e2e8f0;background:#fff;color:#718096;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;transition:all .15s;}
+    .lab-tab.active{background:#2a5298;color:#fff;border-color:#2a5298;}
+    .lab-tab:hover:not(.active){border-color:#2a5298;color:#2a5298;}
+    .cal-wrap{background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .cal-head-row{display:grid;grid-template-columns:repeat(7,1fr);background:#f7fafc;border-bottom:1px solid #e2e8f0;}
+    .cal-head-cell{padding:8px 0;text-align:center;font-size:0.7rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.05em;}
+    .cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
+    .cal-cell{min-height:78px;border-right:1px solid #f0f4f8;border-bottom:1px solid #f0f4f8;padding:6px 7px;cursor:pointer;transition:background .1s;position:relative;}
+    .cal-cell:nth-child(7n){border-right:none;}
+    .cal-cell:hover{background:#fafbff;}
+    .cal-cell.empty{background:#fafafa;cursor:default;}
+    .cal-cell.empty:hover{background:#fafafa;}
+    .cal-cell.today{background:#eff6ff;}
+    .cal-cell.selected{background:#e8f0fd;outline:2px solid #2a5298;outline-offset:-1px;}
+    .day-num{font-size:0.76rem;font-weight:600;color:#4a5568;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:3px;}
+    .cal-cell.today .day-num{background:#2a5298;color:#fff;}
+    .booking-pill{display:block;font-size:0.62rem;font-weight:600;border-radius:3px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .pill-approved{background:#c6f6d5;color:#22543d;border-left:2px solid #38a169;}
+    .pill-pending{background:#fefcbf;color:#744210;border-left:2px solid #d69e2e;}
+    .pill-more{font-size:0.58rem;color:#a0aec0;padding:0 2px;}
+    .detail-wrap{margin-top:12px;background:#fff;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+    .detail-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #f0f4f8;background:#f7fafc;}
+    .detail-title{font-size:0.88rem;font-weight:700;color:#1a202c;}
+    .detail-sub{font-size:0.72rem;color:#718096;margin-top:1px;}
+    .detail-table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+    .detail-table th{padding:8px 14px;text-align:left;font-size:0.68rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #f0f4f8;background:#fff;}
+    .detail-table td{padding:9px 14px;border-bottom:1px solid #f7fafc;color:#2d3748;}
+    .detail-table tr:last-child td{border-bottom:none;}
+    .detail-table tr:hover td{background:#fafbff;}
+    .badge{display:inline-flex;align-items:center;gap:3px;border-radius:20px;padding:2px 8px;font-size:0.68rem;font-weight:700;}
+    .badge::before{content:'';width:5px;height:5px;border-radius:50%;}
+    .badge-approved{background:#c6f6d5;color:#22543d;}.badge-approved::before{background:#38a169;}
+    .badge-pending{background:#fefcbf;color:#744210;}.badge-pending::before{background:#d69e2e;}
+    .pc-tag{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:4px;padding:1px 6px;font-size:0.7rem;font-weight:700;}
+    .empty-msg{text-align:center;padding:24px;color:#a0aec0;font-size:0.85rem;}
+    .legend{display:flex;gap:14px;margin-top:8px;}
+    .leg{display:flex;align-items:center;gap:5px;font-size:0.72rem;color:#718096;}
+    .leg-dot{width:10px;height:5px;border-radius:2px;}
   </style>
 </head>
 <body>
@@ -272,129 +61,96 @@
 {{ admin_nav('calendar') }}
 
 <div class="page-wrap">
-  <div class="page-title">PC Booking Calendar</div>
-
-  <div class="cal-toolbar">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      {% set prev_m = month-1 if month>1 else 12 %}
+      {% set prev_y = year if month>1 else year-1 %}
+      {% set next_m = month+1 if month<12 else 1 %}
+      {% set next_y = year if month<12 else year+1 %}
+      <a href="{{ url_for('admin_calendar', lab=lab, year=prev_y, month=prev_m) }}" class="icon-btn">‹</a>
+      <span class="month-label">{{ ['','January','February','March','April','May','June','July','August','September','October','November','December'][month] }} {{ year }}</span>
+      <a href="{{ url_for('admin_calendar', lab=lab, year=next_y, month=next_m) }}" class="icon-btn">›</a>
+      <a href="{{ url_for('admin_calendar', lab=lab) }}" class="today-btn">Today</a>
+    </div>
     <div class="lab-tabs">
       {% for l in ['524','526','528','530','542'] %}
-        <a href="{{ url_for('admin_calendar', lab=l, year=year, month=month) }}"
-           class="lab-tab {% if lab == l %}active{% endif %}">Lab {{ l }}</a>
+        <a href="{{ url_for('admin_calendar', lab=l, year=year, month=month) }}" class="lab-tab {% if lab==l %}active{% endif %}">Lab {{ l }}</a>
       {% endfor %}
-    </div>
-
-    <div class="month-nav">
-      {% set prev_month = month - 1 if month > 1 else 12 %}
-      {% set prev_year  = year if month > 1 else year - 1 %}
-      {% set next_month = month + 1 if month < 12 else 1 %}
-      {% set next_year  = year if month < 12 else year + 1 %}
-      <a href="{{ url_for('admin_calendar', lab=lab, year=prev_year, month=prev_month) }}" class="nav-btn">← Prev</a>
-      <span class="month-label">
-        {{ ['','January','February','March','April','May','June','July','August','September','October','November','December'][month] }} {{ year }}
-      </span>
-      <a href="{{ url_for('admin_calendar', lab=lab, year=next_year, month=next_month) }}" class="nav-btn">Next →</a>
     </div>
   </div>
 
-  <!-- Calendar -->
-  <div class="cal-card">
-    <div class="cal-grid">
-      {% for day_name in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] %}
-        <div class="cal-head">{{ day_name }}</div>
+  <div class="cal-wrap">
+    <div class="cal-head-row">
+      {% for d in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] %}
+        <div class="cal-head-cell">{{ d }}</div>
       {% endfor %}
-
-      {% set res_by_date = {} %}
-      {% for r in reservations %}
-        {% set d = r.date %}
-        {% if d not in res_by_date %}{% set _ = res_by_date.update({d: []}) %}{% endif %}
-        {% set _ = res_by_date[d].append(r) %}
-      {% endfor %}
-
-      {% set start_offset = first_day_offset %}
-      {% set days_in_month = total_days %}
-
-      {% for i in range(start_offset) %}
-        <div class="cal-cell empty"></div>
-      {% endfor %}
-
-      {% for day in range(1, days_in_month + 1) %}
-        {% set date_str = '%04d-%02d-%02d'|format(year, month, day) %}
-        {% set day_res  = res_by_date.get(date_str, []) %}
-        {% set is_today = date_str == today_str %}
-        <div class="cal-cell {% if is_today %}today{% endif %}" onclick="showDay('{{ date_str }}')">
-          <div class="cal-day">{{ day }}</div>
+    </div>
+    {% set res_by_date = {} %}
+    {% for r in reservations %}
+      {% if r.date not in res_by_date %}{% set _ = res_by_date.update({r.date: []}) %}{% endif %}
+      {% set _ = res_by_date[r.date].append(r) %}
+    {% endfor %}
+    <div class="cal-body">
+      {% for i in range(first_day_offset) %}<div class="cal-cell empty"></div>{% endfor %}
+      {% for day in range(1, total_days+1) %}
+        {% set ds = '%04d-%02d-%02d'|format(year, month, day) %}
+        {% set day_res = res_by_date.get(ds, []) %}
+        <div class="cal-cell {% if ds==today_str %}today{% endif %}" id="cell-{{ ds }}" onclick="selectDay('{{ ds }}')">
+          <div class="day-num">{{ day }}</div>
           {% for r in day_res[:2] %}
-            <span class="booking-chip chip-{{ r.status }}">
-              {{ ('PC-' + '%02d'|format(r.pc_number|int)) if r.pc_number else 'Walk-in' }} · {{ r.firstname }}
+            <span class="booking-pill pill-{{ r.status }}" title="{{ r.firstname }} {{ r.lastname }} — {{ r.time_slot }}">
+              {% if r.pc_number %}PC-{{ '%02d'|format(r.pc_number|int) }}{% else %}Walk-in{% endif %} · {{ r.firstname }}
             </span>
           {% endfor %}
-          {% if day_res|length > 2 %}
-            <span class="more-chip">+{{ day_res|length - 2 }} more</span>
-          {% endif %}
+          {% if day_res|length > 2 %}<span class="pill-more">+{{ day_res|length - 2 }} more</span>{% endif %}
         </div>
       {% endfor %}
-
-      {% set total_cells = start_offset + days_in_month %}
-      {% set remainder   = total_cells % 7 %}
-      {% if remainder != 0 %}
-        {% for i in range(7 - remainder) %}
-          <div class="cal-cell empty"></div>
-        {% endfor %}
-      {% endif %}
+      {% set remainder = (first_day_offset + total_days) % 7 %}
+      {% if remainder != 0 %}{% for i in range(7-remainder) %}<div class="cal-cell empty"></div>{% endfor %}{% endif %}
     </div>
   </div>
 
-  <!-- Detail panel -->
-  <div class="detail-panel" id="detailPanel">
-    <div class="detail-header" id="detailHeader">Click a day to see bookings</div>
-    <div class="detail-body">
-      {% if reservations %}
-      <table class="detail-table" id="detailTable">
-        <thead>
-          <tr><th>Student</th><th>PC</th><th>Time Slot</th><th>Purpose</th><th>Status</th></tr>
-        </thead>
-        <tbody id="detailBody">
-          <tr><td colspan="5" class="empty-detail">Click a date above to filter bookings.</td></tr>
-        </tbody>
-      </table>
-      {% else %}
-        <div class="empty-detail">No reservations for Lab {{ lab }} in this month.</div>
-      {% endif %}
+  <div class="legend">
+    <div class="leg"><span class="leg-dot" style="background:#c6f6d5;"></span> Approved</div>
+    <div class="leg"><span class="leg-dot" style="background:#fefcbf;"></span> Pending</div>
+  </div>
+
+  <div class="detail-wrap" id="detailWrap">
+    <div class="detail-head">
+      <div><div class="detail-title" id="detailTitle">Select a date to view bookings</div><div class="detail-sub">Lab {{ lab }}</div></div>
+      <span id="detailCount" style="font-size:0.75rem;color:#718096;"></span>
     </div>
+    <div id="detailBody"><div class="empty-msg">Click any date on the calendar.</div></div>
   </div>
 </div>
 
 <script>
-const allRes = {{ reservations | tojson }};
-const months = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+const allRes   = {{ reservations | tojson }};
+const todayStr = '{{ today_str }}';
+const MONTHS   = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+let sel = null;
 
-function showDay(dateStr) {
-  const filtered = allRes.filter(r => r.date === dateStr);
-  const header   = document.getElementById('detailHeader');
-  const body     = document.getElementById('detailBody');
-  if (!header || !body) return;
-
-  const parts = dateStr.split('-');
-  header.textContent = `Bookings — ${months[parseInt(parts[1])]} ${parseInt(parts[2])}, ${parts[0]} · Lab {{ lab }}`;
-
-  if (!filtered.length) {
-    body.innerHTML = '<tr><td colspan="5" class="empty-detail">No bookings on this date.</td></tr>';
-    return;
-  }
-  body.innerHTML = filtered.map(r => `
-    <tr>
-      <td>
-        <strong>${r.firstname} ${r.lastname}</strong>
-        <span class="sub-text">${r.idno}</span>
-      </td>
-      <td>${r.pc_number ? `<span class="pc-chip">PC-${String(r.pc_number).padStart(2,'0')}</span>` : '<span style="color:#cbd5e1;">—</span>'}</td>
-      <td>${r.time_slot}</td>
-      <td>${r.purpose}</td>
+function selectDay(ds) {
+  if (sel) sel.classList.remove('selected');
+  const cell = document.getElementById('cell-'+ds);
+  if (cell) { cell.classList.add('selected'); sel = cell; }
+  const filtered = allRes.filter(r => r.date === ds);
+  const parts = ds.split('-');
+  document.getElementById('detailTitle').textContent = `${MONTHS[parseInt(parts[1])]} ${parseInt(parts[2])}, ${parts[0]}`;
+  document.getElementById('detailCount').textContent = filtered.length ? filtered.length+' booking'+(filtered.length>1?'s':'') : 'No bookings';
+  const body = document.getElementById('detailBody');
+  if (!filtered.length) { body.innerHTML='<div class="empty-msg">No bookings on this date.</div>'; return; }
+  body.innerHTML = `<table class="detail-table"><thead><tr><th>Student</th><th>PC</th><th>Time Slot</th><th>Purpose</th><th>Status</th></tr></thead><tbody>
+    ${filtered.map(r=>`<tr>
+      <td><div style="font-weight:600;">${r.firstname} ${r.lastname}</div><div style="font-size:0.7rem;color:#718096;">${r.idno}</div></td>
+      <td>${r.pc_number?`<span class="pc-tag">PC-${String(r.pc_number).padStart(2,'0')}</span>`:'<span style="color:#a0aec0;">—</span>'}</td>
+      <td style="font-size:0.78rem;">${r.time_slot}</td><td>${r.purpose}</td>
       <td><span class="badge badge-${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
-    </tr>`).join('');
+    </tr>`).join('')}</tbody></table>`;
 }
 
-const todayStr = '{{ today_str }}';
-if (allRes.some(r => r.date === todayStr)) showDay(todayStr);
+if (allRes.some(r=>r.date===todayStr)) selectDay(todayStr);
+else { const c=document.getElementById('cell-'+todayStr); if(c){c.classList.add('selected');sel=c;} }
 </script>
 </body>
 </html>

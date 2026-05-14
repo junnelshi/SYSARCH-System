@@ -16,7 +16,7 @@
     <div class="page-heading" style="margin:0;">Sit-in Records</div>
     <div style="display:flex;gap:8px;">
       <a href="{{ url_for('export_pdf') }}" class="btn btn-primary btn-sm" target="_blank">📄 Export PDF</a>
-      <a href="{{ url_for('export_csv') }}" class="btn btn-success btn-sm">⬇ Export CSV</a>
+      <a href="{{ url_for('export_csv') }}" class="btn btn-success btn-sm">⬇ Export Excel</a>
     </div>
   </div>
 
@@ -69,7 +69,9 @@
       </table>
     </div>
   </div>
-</div>
+</div><!-- end admin-page -->
+</div><!-- end admin-main-content -->
+
 <script>
 function searchTable(q) {
   document.querySelectorAll('#recordsTable tbody tr').forEach(r=>{

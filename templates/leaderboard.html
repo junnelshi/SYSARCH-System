@@ -94,6 +94,26 @@
     .flash { display: flex; align-items: center; justify-content: space-between; padding: 11px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; margin-bottom: 8px; }
     .flash button { background: none; border: none; cursor: pointer; opacity: .5; }
     .flash-info { background: #bee3f8; border-left: 4px solid #3182ce; color: #1a365d; }
+
+    /* ── Dark Mode ── */
+    body.dark { background: #23272f; color: #d5d8de; }
+    body.dark .navbar { background: linear-gradient(90deg, #1e222a, #2a3350); }
+    body.dark .page-title { color: #ebedf0; }
+    body.dark .page-sub { color: #8b95a5; }
+    body.dark .card { background: #2b3039; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+    body.dark .card-header { background: linear-gradient(90deg, #344264, #4068a8); }
+    body.dark .lb-table th { background: #272c35; color: #a0a8b6; border-bottom-color: #383e49; }
+    body.dark .lb-table td { color: #c5c9d2; border-bottom-color: #32383f; }
+    body.dark .lb-table tr:hover td { background: #313740; }
+    body.dark .lb-table tr.me td { background: rgba(91,156,240,.1); }
+    body.dark .student-full-name { color: #ebedf0; }
+    body.dark .student-course { color: #8b95a5; }
+    body.dark .rank-num { color: #8b95a5; }
+    body.dark .pts-badge { background: linear-gradient(90deg,#3a3220,#4a3d1a); color: #fbd38d; border-color: #6b5b2a; }
+    body.dark .sessions-bar-bg { background: #383e49; }
+    body.dark .empty { color: #6b7280; }
+    body.dark .flash-info { background: #252f3f; border-left-color: #3182ce; color: #90cdf4; }
+    body.dark .me-tag { background: rgba(91,156,240,.15); color: #5b9cf0; }
   </style>
 </head>
 <body>
@@ -172,7 +192,22 @@
             </div>
           </td>
           <td>{{ s.course }} — Yr {{ s.level }}</td>
-          <td><span class="pts-badge">⭐ {{ s.points }}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:1.1rem;font-weight:800;color:#2a5298;">{{ s.weighted_score or 0 }}</span>
+              <span style="font-size:0.7rem;color:#a0aec0;">/100</span>
+            </div>
+          </td>
+          <td>
+            <div style="font-size:0.72rem;color:#718096;display:flex;flex-direction:column;gap:2px;">
+              <span>⭐ {{ s.points }} pts &nbsp;·&nbsp; {{ s.total_hours or 0 }} hrs &nbsp;·&nbsp; {{ s.total_sessions or 0 }} sessions</span>
+              <div style="display:flex;gap:3px;margin-top:2px;">
+                <div style="height:4px;border-radius:2px;background:#2a5298;width:{{ [((s.points or 0) / 100 * 50)|int, 50]|min }}px;" title="Points 50%"></div>
+                <div style="height:4px;border-radius:2px;background:#38a169;width:{{ [((s.total_hours or 0) / 10 * 30)|int, 30]|min }}px;" title="Hours 30%"></div>
+                <div style="height:4px;border-radius:2px;background:#d69e2e;width:{{ [((s.total_sessions or 0) / 30 * 20)|int, 20]|min }}px;" title="Sessions 20%"></div>
+              </div>
+            </div>
+          </td>
           <td>
             <div class="sessions-bar-wrap">
               {% set pct = (s.remaining_session / 30 * 100)|int %}
@@ -191,12 +226,23 @@
     {% endif %}
   </div>
 
-  <div style="margin-top:14px;font-size:0.78rem;color:#a0aec0;text-align:center;">
+  <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:20px;font-size:0.75rem;color:#718096;">
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:5px;background:#2a5298;border-radius:2px;display:inline-block;"></span>Points (50%)</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:5px;background:#38a169;border-radius:2px;display:inline-block;"></span>Sit-in Hours (30%)</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:5px;background:#d69e2e;border-radius:2px;display:inline-block;"></span>Sessions (20%)</span>
+</div>
+<div style="margin-top:8px;font-size:0.78rem;color:#a0aec0;text-align:center;">
     Points are awarded automatically: +5 for approved reservation · +2 for feedback · +1 per sit-in session
   </div>
 </div>
 
 <script>
+// Restore dark mode from admin toggle
+(function(){
+  if (localStorage.getItem('adminDark') === '1' || localStorage.getItem('darkMode') === '1') {
+    document.body.classList.add('dark');
+  }
+})();
 setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); },5000);
 </script>
 

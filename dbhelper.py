@@ -304,19 +304,58 @@ def reset_all_sessions():
 
 
 def get_leaderboard():
-    """Returns top students ordered by points descending."""
+    """
+    Weighted leaderboard score:
+      50% Earned Points      (admin-awarded points, normalized to max 100)
+      30% Total Sit-in Hours (capped at 10 hrs = 100%)
+      20% Tasks Completed    (sessions completed, capped at 30 = 100%)
+    Final score is out of 100.
+    """
     conn = connect()
     cur  = conn.cursor()
     cur.execute('''
-        SELECT idno, firstname, lastname, course, level, points,
-               remaining_session
-        FROM students
-        ORDER BY points DESC, lastname ASC
+        SELECT
+            s.idno, s.firstname, s.lastname, s.course, s.level,
+            s.points, s.remaining_session, s.profile_image,
+            -- sit-in stats
+            COUNT(r.id) as total_sessions,
+            ROUND(SUM(
+                (strftime('%s', r.logout_time) - strftime('%s', r.login_time)) / 3600.0
+            ), 2) as total_hours,
+            -- weighted score
+            ROUND(
+                (CAST(s.points AS FLOAT) / NULLIF((SELECT MAX(points) FROM students), 0) * 50) +
+                (MIN(SUM((strftime('%s',r.logout_time)-strftime('%s',r.login_time))/3600.0), 10) / 10.0 * 30) +
+                (MIN(COUNT(r.id), 30) / 30.0 * 20)
+            , 1) as weighted_score
+        FROM students s
+        LEFT JOIN sit_in_records r ON r.idno = s.idno
+        GROUP BY s.idno
+        ORDER BY weighted_score DESC, s.points DESC, s.lastname ASC
         LIMIT 20
     ''')
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return [dict(r) for r in rows]
+
+
+def get_active_sitin_detail():
+    """Get active sit-ins with full student info for PC control panel."""
+    conn = connect()
+    cur  = conn.cursor()
+    cur.execute('''
+        SELECT s.id as sit_id, s.idno, s.purpose, s.lab, s.login_time,
+               st.firstname, st.lastname, st.course, st.level,
+               st.remaining_session, st.profile_image,
+               ROUND((strftime('%s','now') - strftime('%s', s.login_time)) / 60.0, 0) as elapsed_mins
+        FROM sit_in s
+        JOIN students st ON s.idno = st.idno
+        WHERE s.status = 'active'
+        ORDER BY s.login_time ASC
+    ''')
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
 
 
 def add_points(idno, pts):

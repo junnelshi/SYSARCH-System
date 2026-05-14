@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PC Control Panel — CCS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <style>
+    .page-wrap { max-width:1300px; margin:0 auto; padding:24px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+    .page-title { font-size:1.2rem; font-weight:800; color:#1a202c; }
+    .live-badge { display:inline-flex; align-items:center; gap:6px; background:#f0fff4; border:1px solid #9ae6b4; border-radius:20px; padding:4px 12px; font-size:0.75rem; font-weight:700; color:#22543d; }
+    .live-dot { width:7px; height:7px; border-radius:50%; background:#38a169; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ── Summary strip ── */
+    .summary-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+    .strip-box { background:#fff; border-radius:10px; padding:14px 18px; border:1px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+    .strip-num { font-size:1.6rem; font-weight:800; }
+    .strip-num.blue   { color:#2a5298; }
+    .strip-num.green  { color:#38a169; }
+    .strip-num.orange { color:#d69e2e; }
+    .strip-num.red    { color:#e53e3e; }
+    .strip-lbl { font-size:0.72rem; color:#718096; font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin-top:2px; }
+
+    /* ── PC Cards grid ── */
+    .section-label { font-size:0.72rem; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+    .pc-cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px; margin-bottom:24px; }
+
+    .pc-card {
+      background:#fff; border-radius:12px; border:1.5px solid #e2e8f0;
+      box-shadow:0 1px 4px rgba(0,0,0,.05); overflow:hidden;
+      transition:all .2s; position:relative;
+    }
+    .pc-card.active  { border-color:#38a169; box-shadow:0 2px 10px rgba(56,161,105,.15); }
+    .pc-card.vacant  { border-color:#e2e8f0; opacity:.75; }
+
+    .pc-card-top { padding:14px 14px 10px; }
+    .pc-card-label { font-size:0.7rem; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; }
+    .status-pip { width:8px; height:8px; border-radius:50%; }
+    .pip-active { background:#38a169; animation:pulse 2s infinite; }
+    .pip-vacant { background:#cbd5e0; }
+
+    .pc-icon { font-size:1.8rem; text-align:center; margin:4px 0 8px; }
+    .student-name { font-size:0.88rem; font-weight:700; color:#1a202c; text-align:center; }
+    .student-meta { font-size:0.72rem; color:#718096; text-align:center; margin-top:2px; }
+    .vacant-text  { font-size:0.82rem; color:#a0aec0; text-align:center; font-style:italic; padding:8px 0; }
+
+    .pc-card-bottom { border-top:1px solid #f0f4f8; padding:8px 14px; background:#f7fafc; }
+    .info-row-sm { display:flex; justify-content:space-between; font-size:0.72rem; margin-bottom:3px; }
+    .info-row-sm .lbl { color:#a0aec0; font-weight:600; }
+    .info-row-sm .val { color:#4a5568; font-weight:600; }
+
+    .elapsed-bar-bg   { background:#e2e8f0; border-radius:4px; height:4px; margin-top:6px; overflow:hidden; }
+    .elapsed-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#38a169,#d69e2e); transition:width .5s; }
+
+    .logout-btn {
+      display:block; width:100%; margin-top:8px; padding:6px;
+      background:#fff; color:#e53e3e; border:1px solid #fed7d7;
+      border-radius:6px; font-size:0.75rem; font-weight:700;
+      font-family:'Inter',sans-serif; cursor:pointer; text-align:center;
+      text-decoration:none; transition:all .15s;
+    }
+    .logout-btn:hover { background:#fff5f5; }
+
+    /* ── Log table ── */
+    .card { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.07); overflow:hidden; }
+    .card-header { background:linear-gradient(90deg,#2a5298,#3b6fd4); color:#fff; padding:13px 18px; font-size:0.9rem; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .log-table { width:100%; border-collapse:collapse; font-size:0.84rem; }
+    .log-table th { background:#f7fafc; padding:9px 14px; text-align:left; font-size:0.7rem; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:.04em; border-bottom:2px solid #e2e8f0; }
+    .log-table td { padding:10px 14px; border-bottom:1px solid #f0f4f8; color:#2d3748; }
+    .log-table tr:last-child td { border-bottom:none; }
+    .log-table tr:hover td { background:#f7fafc; }
+    .badge-active { background:#c6f6d5; color:#22543d; border-radius:20px; padding:2px 9px; font-size:0.72rem; font-weight:700; display:inline-flex; align-items:center; gap:4px; }
+    .badge-active::before { content:''; width:5px; height:5px; border-radius:50%; background:#38a169; }
+    .empty-msg { text-align:center; padding:32px; color:#a0aec0; font-size:0.88rem; }
+
+    .flash-wrap { max-width:1300px; margin:16px auto 0; padding:0 24px; }
+    .flash { display:flex; align-items:center; justify-content:space-between; padding:11px 18px; border-radius:8px; font-size:0.88rem; font-weight:500; margin-bottom:8px; }
+    .flash button { background:none; border:none; cursor:pointer; opacity:.5; }
+    .flash-success { background:#c6f6d5; border-left:4px solid #38a169; color:#22543d; }
+    .flash-error   { background:#fed7d7; border-left:4px solid #e53e3e; color:#742a2a; }
+  </style>
+</head>
+<body>
+{% from 'macros.html' import admin_nav %}
+{{ admin_nav('pc_control') }}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}<button onclick="this.parentElement.remove()">✕</button></div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-title">PC Control Panel</div>
+    <span class="live-badge"><span class="live-dot"></span> Live — refreshes every 15s</span>
+  </div>
+
+  <!-- Summary strip -->
+  <div class="summary-strip">
+    <div class="strip-box">
+      <div class="strip-num blue" id="totalActive">{{ active_sitins|length }}</div>
+      <div class="strip-lbl">Currently Sitting In</div>
+    </div>
+    <div class="strip-box">
+      <div class="strip-num green">{{ all_students|length }}</div>
+      <div class="strip-lbl">Total Students</div>
+    </div>
+    <div class="strip-box">
+      <div class="strip-num orange" id="avgElapsed">
+        {% if active_sitins %}
+          {{ (active_sitins | map(attribute='elapsed_mins') | map('float') | sum / active_sitins|length) | round(0) | int }} min
+        {% else %}—{% endif %}
+      </div>
+      <div class="strip-lbl">Avg Session Time</div>
+    </div>
+    <div class="strip-box">
+      <div class="strip-num red">
+        {{ active_sitins | selectattr('elapsed_mins', 'greaterthan', 90) | list | length }}
+      </div>
+      <div class="strip-lbl">Sessions &gt; 90 min</div>
+    </div>
+  </div>
+
+  <!-- Active PC cards -->
+  <div class="section-label">Active Sessions — {{ active_sitins|length }} student{{ 's' if active_sitins|length != 1 }}</div>
+  <div class="pc-cards" id="pcCards">
+    {% if active_sitins %}
+      {% for s in active_sitins %}
+      <div class="pc-card active">
+        <div class="pc-card-top">
+          <div class="pc-card-label">
+            <span>Lab {{ s.lab }}</span>
+            <span class="status-pip pip-active"></span>
+          </div>
+          <div class="pc-icon">🖥️</div>
+          <div class="student-name">{{ s.firstname }} {{ s.lastname }}</div>
+          <div class="student-meta">{{ s.idno }} · {{ s.course }}</div>
+        </div>
+        <div class="pc-card-bottom">
+          <div class="info-row-sm"><span class="lbl">Purpose</span><span class="val">{{ s.purpose }}</span></div>
+          <div class="info-row-sm"><span class="lbl">Login</span><span class="val">{{ s.login_time[11:16] if s.login_time else '—' }}</span></div>
+          <div class="info-row-sm"><span class="lbl">Elapsed</span><span class="val">{{ s.elapsed_mins | int }} min</span></div>
+          <div class="info-row-sm"><span class="lbl">Sessions left</span><span class="val">{{ s.remaining_session }}</span></div>
+          <div class="elapsed-bar-bg">
+            <div class="elapsed-bar-fill" style="width:{{ [((s.elapsed_mins or 0) / 120 * 100)|int, 100]|min }}%;"></div>
+          </div>
+          <a href="{{ url_for('admin_logout_student', sit_id=s.sit_id) }}"
+             class="logout-btn"
+             onclick="return confirm('Log out {{ s.firstname }} {{ s.lastname }}?')">
+            Log Out Student
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- Vacant placeholder cards -->
+      {% for i in range([8 - active_sitins|length, 0]|max) %}
+      <div class="pc-card vacant">
+        <div class="pc-card-top">
+          <div class="pc-card-label">
+            <span>Available</span>
+            <span class="status-pip pip-vacant"></span>
+          </div>
+          <div class="pc-icon" style="opacity:.3;">🖥️</div>
+          <div class="vacant-text">No student</div>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% else %}
+      <div style="grid-column:1/-1;text-align:center;padding:48px;color:#a0aec0;font-size:0.9rem;background:#fff;border-radius:12px;border:1.5px dashed #e2e8f0;">
+        🖥️ No students are currently sitting in.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Active sessions log table -->
+  <div class="card">
+    <div class="card-header">
+      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Session Log
+    </div>
+    {% if active_sitins %}
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>ID Number</th>
+          <th>Lab</th>
+          <th>Purpose</th>
+          <th>Login Time</th>
+          <th>Elapsed</th>
+          <th>Sessions Left</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in active_sitins %}
+        <tr>
+          <td><strong>{{ s.lastname }}, {{ s.firstname }}</strong><br><span style="font-size:0.72rem;color:#718096;">{{ s.course }} — Yr {{ s.level }}</span></td>
+          <td><strong>{{ s.idno }}</strong></td>
+          <td>Lab {{ s.lab }}</td>
+          <td>{{ s.purpose }}</td>
+          <td style="color:#718096;font-size:0.8rem;">{{ s.login_time[11:16] if s.login_time else '—' }}</td>
+          <td>
+            <span style="font-weight:700;color:{% if s.elapsed_mins > 90 %}#e53e3e{% elif s.elapsed_mins > 45 %}#d69e2e{% else %}#38a169{% endif %};">
+              {{ s.elapsed_mins | int }} min
+            </span>
+          </td>
+          <td>{{ s.remaining_session }}</td>
+          <td><span class="badge-active">Active</span></td>
+          <td>
+            <a href="{{ url_for('admin_logout_student', sit_id=s.sit_id) }}"
+               style="font-size:0.75rem;color:#e53e3e;font-weight:700;text-decoration:none;"
+               onclick="return confirm('Log out {{ s.firstname }}?')">Log Out</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty-msg">No active sessions right now.</div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+// Auto-refresh every 15 seconds
+let refreshTimer = setInterval(() => {
+  fetch('/admin/pc_control/data')
+    .then(r => r.json())
+    .then(data => {
+      // Update the active count
+      document.getElementById('totalActive').textContent = data.length;
+      // Full page reload to re-render cards cleanly
+      if (data.length !== {{ active_sitins|length }}) {
+        location.reload();
+      }
+    })
+    .catch(() => {});
+}, 15000);
+
+// Countdown timer display
+let seconds = 15;
+setInterval(() => {
+  seconds--;
+  if (seconds <= 0) seconds = 15;
+  const badge = document.querySelector('.live-badge');
+  if (badge) badge.title = `Next refresh in ${seconds}s`;
+}, 1000);
+
+setTimeout(()=>{ document.querySelectorAll('.flash').forEach(el=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }); },5000);
+</script>
+</body>
+</html>
