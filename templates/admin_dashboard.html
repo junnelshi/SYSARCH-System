@@ -64,6 +64,7 @@
       border: 1.5px solid #e2e8f0; border-radius: 8px;
       font-family: 'Inter', sans-serif; font-size: 0.82rem;
       resize: vertical; outline: none; transition: border .15s;
+      color: #1a202c; background: #fff;
     }
     .ann-textarea:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,.1); }
 
@@ -159,26 +160,53 @@
     .view-all-btn:hover { background: #eff6ff; border-color: #2a5298; }
     .no-lb { text-align: center; padding: 20px 0; color: #a0aec0; font-size: 0.8rem; }
 
-    /* ── Dark mode extras ── */
-    body.dark .summary-box { background: #1e293b; }
-    body.dark .summary-num { color: #f1f5f9; }
-    body.dark .card { background: #1e293b; }
-    body.dark .ann-textarea { background: #0f172a; border-color: #334155; color: #e2e8f0; }
-    body.dark .ann-list-title { color: #f1f5f9; }
-    body.dark .ann-meta { color: #60a5fa; }
-    body.dark .ann-body { color: #94a3b8; }
-    body.dark .ann-item { border-bottom-color: #1e293b; }
-    body.dark .stat-strip { border-bottom-color: #334155; }
-    body.dark .stat-strip-item:first-child { border-right-color: #334155; }
-    body.dark .strip-num { color: #60a5fa; }
+    /* ══════════════════════════════════════════
+       DARK MODE — admin dashboard specific
+       (global dark rules are in macros.html)
+       ══════════════════════════════════════════ */
+    body.dark .summary-box   { background: #2b3039; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+    body.dark .summary-num   { color: #ebedf0; }
+    body.dark .summary-lbl   { color: #8b95a5; }
+    body.dark .summary-icon.blue   { background: rgba(42,82,152,0.25); }
+    body.dark .summary-icon.green  { background: rgba(56,161,105,0.25); }
+    body.dark .summary-icon.orange { background: rgba(214,158,46,0.25); }
+
+    body.dark .card          { background: #2b3039; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+    body.dark .card-header   { background: linear-gradient(90deg, #344264, #4068a8); }
+    body.dark .card-body     { background: #2b3039; }
+
+    body.dark .ann-textarea  { background: #1e222a; border-color: #3a4049; color: #d5d8de; }
+    body.dark .ann-textarea::placeholder { color: #6b7280; }
+    body.dark .ann-textarea:focus { border-color: #5b9cf0; }
+    body.dark .ann-list-title { color: #ebedf0; }
+    body.dark .ann-item      { border-bottom-color: #32383f; }
+    body.dark .ann-dot       { background: #5b9cf0; }
+    body.dark .ann-meta      { color: #6da3e8; }
+    body.dark .ann-body      { color: #c5c9d2; }
+    body.dark .ann-delete    { background: rgba(229,62,62,.1); border-color: rgba(229,62,62,.25); color: #fc8181; }
+    body.dark .ann-delete:hover { background: #e53e3e; color: #fff; border-color: #e53e3e; }
+
+    body.dark .stat-strip    { border-bottom-color: #32383f; }
+    body.dark .stat-strip-item:first-child { border-right-color: #32383f; }
+    body.dark .strip-num     { color: #6da3e8; }
     body.dark .strip-num.green { color: #4ade80; }
-    body.dark .bar-track { background: #334155; }
-    body.dark .bar-name.gray { color: #94a3b8; }
-    body.dark .lb-row { background: #0f172a; border-color: #334155; }
-    body.dark .lb-row:hover { background: #1e3a5f; border-color: #3b82f6; }
-    body.dark .lb-name { color: #f1f5f9; }
-    body.dark .view-all-btn { background: #0f172a; border-color: #334155; color: #60a5fa; }
-    body.dark .view-all-btn:hover { background: #1e3a5f; border-color: #3b82f6; }
+    body.dark .strip-lbl     { color: #8b95a5; }
+
+    body.dark .bar-track     { background: #3a4049; }
+    body.dark .bar-name.blue { color: #6da3e8; }
+    body.dark .bar-name.gray { color: #a0a8b6; }
+    body.dark .bar-count     { color: #8b95a5; }
+    body.dark .section-label { color: #6b7280; }
+    body.dark .view-link     { color: #6da3e8; }
+
+    body.dark .lb-row        { background: #1e222a; border-color: #3a4049; }
+    body.dark .lb-row:hover  { background: #252d3d; border-color: #5b9cf0; }
+    body.dark .lb-name       { color: #ebedf0; }
+    body.dark .lb-course     { color: #8b95a5; }
+    body.dark .lb-pts        { color: #fbbf24; }
+    body.dark .no-lb         { color: #6b7280; }
+    body.dark .view-all-btn  { background: #1e222a; border-color: #3a4049; color: #6da3e8; }
+    body.dark .view-all-btn:hover { background: #252d3d; border-color: #5b9cf0; }
   </style>
 </head>
 <body>
@@ -269,7 +297,6 @@
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
         Lab Activity Summary
       </div>
-
       <div class="stat-strip">
         <div class="stat-strip-item">
           <div class="strip-num">{{ stats.total_sitins }}</div>
@@ -280,7 +307,6 @@
           <div class="strip-lbl">Active Now</div>
         </div>
       </div>
-
       <div class="card-body" style="padding:12px 14px 6px;">
         {% if stats.lab_counts %}
           <div class="section-label">Lab Usage</div>
@@ -293,7 +319,6 @@
             </div>
           {% endfor %}
         {% endif %}
-
         {% if stats.purpose_counts %}
           <div class="section-label" style="margin-top:10px;">Top Purposes</div>
           {% set max_p = stats.purpose_counts[0].cnt if stats.purpose_counts else 1 %}

@@ -86,6 +86,97 @@
     .pts-quick-btn:hover { background: #ebf4ff; border-color: #2a5298; }
     .pts-quick-btn.neg { color: #e53e3e; }
     .pts-quick-btn.neg:hover { background: #fff5f5; border-color: #e53e3e; }
+    body.dark .page-title { color: #ebedf0; }
+ 
+body.dark .card { background: #252a36; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+body.dark .card-header-bar { background: #252a36; border-bottom-color: #2e3447; }
+ 
+body.dark .search-input {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #d5d8de;
+}
+body.dark .search-input::placeholder { color: #5a6480; }
+body.dark .search-input:focus { border-color: #5b9cf0; }
+ 
+body.dark .students-table th {
+  background: #1e2335;
+  color: #8b95a5;
+  border-bottom-color: #2e3447;
+}
+body.dark .students-table td {
+  color: #c5c9d2;
+  border-bottom-color: #252e42;
+}
+body.dark .students-table tr:hover td { background: #2a3045; }
+body.dark .students-table tr:last-child td { border-bottom: none; }
+ 
+body.dark .student-name { color: #ebedf0; }
+body.dark .student-id   { color: #8b95a5; }
+ 
+body.dark .session-bar-bg { background: #2e3447; }
+ 
+/* Points badge */
+body.dark .pts-badge {
+  background: linear-gradient(90deg, rgba(245,158,11,0.2), rgba(217,119,6,0.2));
+  color: #fbd38d;
+  border-color: rgba(251,211,141,0.3);
+}
+ 
+/* Action buttons */
+body.dark .btn-primary   { background: #2a5298; color: #fff; }
+body.dark .btn-primary:hover { background: #3a62b8; }
+body.dark .btn-gold { background: linear-gradient(90deg,#b45309,#d97706); color: #fff; }
+body.dark .btn-gold:hover { background: linear-gradient(90deg,#92400e,#b45309); }
+body.dark .btn-danger {
+  background: transparent;
+  color: #fc8181;
+  border-color: rgba(252,129,129,0.3);
+}
+body.dark .btn-danger:hover { background: rgba(252,129,129,0.1); }
+body.dark .btn-secondary {
+  background: #2a3045;
+  color: #c5c9d2;
+  border-color: #3a4258;
+}
+body.dark .btn-secondary:hover { background: #323c55; }
+ 
+/* Modals */
+body.dark .modal { background: #252a36; }
+body.dark .modal-header { background: linear-gradient(90deg,#1e2a50,#2a4298); }
+body.dark .modal-header.gold { background: linear-gradient(90deg,#92400e,#b45309); }
+body.dark .modal-body { background: #252a36; }
+body.dark .modal-close { background: rgba(255,255,255,0.12); }
+ 
+body.dark .form-field label { color: #8b95a5; }
+body.dark .form-input {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #d5d8de;
+}
+body.dark .form-input:focus { border-color: #5b9cf0; }
+body.dark .form-input::placeholder { color: #5a6480; }
+ 
+/* Points quick buttons */
+body.dark .pts-quick-btn {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #90cdf4;
+}
+body.dark .pts-quick-btn:hover { background: #232b42; border-color: #5b9cf0; }
+body.dark .pts-quick-btn.neg { color: #fc8181; }
+body.dark .pts-quick-btn.neg:hover { background: rgba(252,129,129,0.08); border-color: #fc8181; }
+ 
+/* Current points info box in points modal */
+body.dark #pointsModal .modal-body > div:first-child {
+  background: rgba(251,211,141,0.1);
+  border-color: rgba(251,211,141,0.2);
+  color: #fbd38d;
+}
+ 
+body.dark .flash-success { background: #162b20; border-left-color: #276749; color: #9ae6b4; }
+body.dark .flash-error   { background: #2b1616; border-left-color: #9b2c2c; color: #fc8181; }
+
   </style>
 </head>
 <body>

@@ -192,6 +192,7 @@ def dashboard():
     sessions_table   = get_student_sessions_table(session['student_id'])
     reservation_on   = get_reservation_setting()
     ai_recs          = get_ai_recommendations(session['student_id'])
+    software_list    = get_all_software()
     return render_template('student_profile.html',
                            student=student,
                            announcements=announcements,
@@ -202,7 +203,8 @@ def dashboard():
                            sitin_summary=sitin_summary,
                            sessions_table=sessions_table,
                            reservation_on=reservation_on,
-                           ai_recs=ai_recs)
+                           ai_recs=ai_recs,
+                           software_list=software_list)
 
 # ── Admin: Announcements ──────────────────────────────────────────────────────
 

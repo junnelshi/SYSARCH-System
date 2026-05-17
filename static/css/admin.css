@@ -947,3 +947,494 @@ body.dark .flash-warning { background: #382f1e; border-color: #d69e2e; color: #f
 
 /* Star rating */
 body.dark .star-rating { color: #d69e2e; }
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE FIX PATCH — paste at the very bottom of admin.css
+   Covers all gaps: page backgrounds, students table, software,
+   calendar page, PC control, reservations, and misc elements.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Base page & layout ── */
+body.dark {
+  background: #1c2030;
+  color: #d5d8de;
+}
+
+body.dark .admin-main-content {
+  background: #1c2030;
+}
+
+/* ── Page headings & section titles ── */
+body.dark .page-heading,
+body.dark .section-title,
+body.dark h1, body.dark h2, body.dark h3 {
+  color: #ebedf0;
+}
+
+/* ── Cards ── */
+body.dark .card {
+  background: #252a36;
+  border: 1px solid #2e3447;
+  box-shadow: 0 2px 10px rgba(0,0,0,.3);
+}
+
+body.dark .card-header {
+  background: linear-gradient(90deg, #2a3560, #3a5298);
+  color: #ebedf0;
+  border-bottom: 1px solid #2e3447;
+}
+
+body.dark .card-body {
+  background: #252a36;
+}
+
+/* ── Table wrapper ── */
+body.dark .table-wrapper {
+  background: #252a36;
+  border: 1px solid #2e3447;
+  box-shadow: 0 2px 10px rgba(0,0,0,.3);
+}
+
+/* ── Table toolbar ── */
+body.dark .table-toolbar {
+  background: #252a36;
+  border-bottom-color: #2e3447;
+}
+
+body.dark .table-search-input {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #d5d8de;
+}
+body.dark .table-search-input::placeholder { color: #5a6480; }
+body.dark .table-search-input:focus { border-color: #5b9cf0; }
+
+body.dark .table-entries-select {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #d5d8de;
+}
+
+/* ── Data table ── */
+body.dark .data-table th {
+  background: #1e2335;
+  color: #8b95a5;
+  border-bottom-color: #2e3447;
+}
+
+body.dark .data-table td {
+  color: #c5c9d2;
+  border-bottom-color: #252e42;
+}
+
+body.dark .data-table tbody tr:hover {
+  background: #2a3045;
+}
+
+body.dark .data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── Table footer ── */
+body.dark .table-footer {
+  background: #252a36;
+  border-top-color: #2e3447;
+  color: #8b95a5;
+}
+
+body.dark .page-btn {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #8b95a5;
+}
+body.dark .page-btn:hover,
+body.dark .page-btn.active {
+  background: #3a5298;
+  border-color: #3a5298;
+  color: #fff;
+}
+
+/* ── Student avatar initials ── */
+body.dark .student-avatar,
+body.dark .lb-avatar-sm {
+  background: linear-gradient(135deg, #2a4298, #5b9cf0);
+  color: #fff;
+}
+
+/* ── Students list — session bar & points badge ── */
+body.dark .session-track { background: #2e3447; }
+body.dark .session-label { color: #8b95a5; }
+
+body.dark .pts-badge { color: #e8a020; }
+
+/* Points cell gold badge */
+body.dark .points-cell {
+  background: rgba(232,160,32,0.15);
+  border-color: rgba(232,160,32,0.3);
+  color: #e8c060;
+}
+
+/* ── Action buttons in table (Edit / Points / Delete) ── */
+body.dark .btn-primary   { background: #2a5298; color: #fff; }
+body.dark .btn-primary:hover { background: #3a62b8; }
+
+body.dark .btn-warning   { background: #c98a18; color: #fff; }
+body.dark .btn-warning:hover { background: #e8a020; }
+
+body.dark .btn-danger    { background: #b83232; color: #fff; }
+body.dark .btn-danger:hover { background: #e53e3e; }
+
+body.dark .btn-success   { background: #276749; color: #fff; }
+body.dark .btn-success:hover { background: #38a169; }
+
+body.dark .btn-secondary { background: #3a4258; color: #c5c9d2; }
+body.dark .btn-secondary:hover { background: #4a5470; }
+
+body.dark .btn-outline {
+  background: transparent;
+  border-color: #3a4258;
+  color: #8b95a5;
+}
+body.dark .btn-outline:hover {
+  background: #2a3045;
+  color: #d5d8de;
+}
+
+/* ── Modals ── */
+body.dark .modal {
+  background: #252a36;
+  border: 1px solid #2e3447;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+
+body.dark .modal-header {
+  background: linear-gradient(90deg, #1e2335, #2a3560);
+  color: #ebedf0;
+  border-bottom: 1px solid #2e3447;
+}
+
+body.dark .modal-header button {
+  color: rgba(255,255,255,0.7);
+}
+body.dark .modal-header button:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+body.dark .modal-body {
+  background: #252a36;
+}
+
+body.dark .modal-overlay {
+  background: rgba(0,0,0,0.65);
+}
+
+/* ── Form inputs (inside modals & pages) ── */
+body.dark .form-input,
+body.dark .form-select,
+body.dark .modal-input,
+body.dark textarea.form-input {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #d5d8de;
+}
+
+body.dark .form-input:focus,
+body.dark .form-select:focus,
+body.dark .modal-input:focus {
+  border-color: #5b9cf0;
+  box-shadow: 0 0 0 3px rgba(91,156,240,0.12);
+}
+
+body.dark .form-input::placeholder,
+body.dark .modal-input::placeholder { color: #5a6480; }
+
+body.dark .form-group label,
+body.dark .form-label { color: #8b95a5; }
+
+/* ── Badges / pills ── */
+body.dark .badge-success  { background: rgba(56,161,105,0.18); color: #68d391; }
+body.dark .badge-danger   { background: rgba(229,62,62,0.18);  color: #fc8181; }
+body.dark .badge-warning  { background: rgba(214,158,46,0.18); color: #fbd38d; }
+body.dark .badge-info     { background: rgba(91,156,240,0.18); color: #90cdf4; }
+body.dark .badge-gray     { background: rgba(160,168,182,0.15); color: #a0aec0; }
+
+body.dark .status-approved { background: rgba(56,161,105,0.15); color: #68d391; }
+body.dark .status-rejected { background: rgba(229,62,62,0.15);  color: #fc8181; }
+body.dark .status-pending  { background: rgba(214,158,46,0.15); color: #fbd38d; }
+
+/* ── Search results (student search modal) ── */
+body.dark .search-results { background: transparent; }
+
+body.dark .result-row {
+  background: #1c2030;
+  border-color: #3a4258;
+}
+body.dark .result-row:hover {
+  background: #232b42;
+  border-color: #5b9cf0;
+}
+body.dark .result-name { color: #ebedf0; }
+body.dark .result-meta { color: #8b95a5; }
+
+body.dark .session-badge {
+  background: rgba(91,156,240,0.15);
+  border-color: rgba(91,156,240,0.25);
+  color: #90cdf4;
+}
+
+body.dark .in-badge {
+  background: rgba(56,161,105,0.2);
+  border-color: rgba(56,161,105,0.3);
+  color: #68d391;
+}
+
+/* ── Software management page ── */
+body.dark .software-item {
+  border-bottom-color: #2e3447;
+}
+body.dark .software-item:last-child { border-bottom: none; }
+body.dark .software-name { color: #ebedf0; }
+body.dark .software-desc { color: #8b95a5; }
+
+/* File upload drop zone */
+body.dark .upload-zone,
+body.dark [class*="drop"],
+body.dark [class*="upload-area"] {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #8b95a5;
+}
+
+/* ── Calendar page ── */
+body.dark .cal-day {
+  background: #252a36;
+  border-color: #2e3447;
+}
+body.dark .cal-day.other-month {
+  background: #1c2030;
+  opacity: 0.5;
+}
+body.dark .cal-day.today {
+  background: #1e2c4a;
+  border-color: #5b9cf0;
+}
+body.dark .cal-day-num { color: #d5d8de; }
+body.dark .cal-day-header { color: #8b95a5; }
+
+/* Calendar lab tabs */
+body.dark .lab-tab,
+body.dark [class*="cal-tab"],
+body.dark [class*="lab-btn"] {
+  background: #252a36;
+  border-color: #3a4258;
+  color: #8b95a5;
+}
+body.dark .lab-tab.active,
+body.dark [class*="cal-tab"].active,
+body.dark [class*="lab-btn"].active {
+  background: #2a5298;
+  border-color: #5b9cf0;
+  color: #fff;
+}
+
+body.dark .cal-event { background: rgba(91,156,240,0.15); color: #7ab8ff; }
+body.dark .cal-event.approved { background: rgba(56,161,105,0.15); color: #68d391; }
+body.dark .cal-event.pending  { background: rgba(214,158,46,0.15);  color: #fbd38d; }
+body.dark .cal-event.rejected { background: rgba(229,62,62,0.15);   color: #fc8181; }
+
+/* Calendar bookings panel at bottom */
+body.dark .booking-panel,
+body.dark [class*="booking-list"],
+body.dark [class*="date-bookings"] {
+  background: #252a36;
+  border-color: #2e3447;
+  color: #c5c9d2;
+}
+
+/* ── PC Control page ── */
+/* Stat cards row at top */
+body.dark .pc-stat-card,
+body.dark .stat-card {
+  background: #252a36;
+  border-color: #2e3447;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+body.dark .stat-card-num,
+body.dark .pc-stat-num { color: #ebedf0; }
+body.dark .stat-card-lbl,
+body.dark .pc-stat-lbl { color: #8b95a5; }
+
+body.dark .stat-card-icon { background: rgba(42,82,152,0.2); }
+body.dark .stat-card.green  .stat-card-icon { background: rgba(56,161,105,0.18); }
+body.dark .stat-card.orange .stat-card-icon { background: rgba(214,158,46,0.18); }
+body.dark .stat-card.red    .stat-card-icon { background: rgba(229,62,62,0.18); }
+
+/* Active sessions panel */
+body.dark .active-sessions-panel,
+body.dark [class*="sessions-box"],
+body.dark [class*="active-panel"] {
+  background: #252a36;
+  border-color: #2e3447;
+}
+
+/* No students placeholder */
+body.dark .no-data,
+body.dark .no-sessions,
+body.dark [class*="empty-state"] {
+  color: #5a6480;
+}
+
+/* Session log */
+body.dark .session-log,
+body.dark [class*="log-box"],
+body.dark [class*="session-log"] {
+  background: #252a36;
+  border-color: #2e3447;
+}
+
+body.dark .session-log-header,
+body.dark [class*="log-header"] {
+  background: linear-gradient(90deg, #2a3560, #3a5298);
+  color: #ebedf0;
+}
+
+/* PC tiles */
+body.dark .pc-tile {
+  background: #1c2030;
+  border-color: #3a4258;
+  color: #c5c9d2;
+}
+body.dark .pc-tile:hover {
+  border-color: #5b9cf0;
+  background: #232b42;
+}
+body.dark .pc-tile.occupied {
+  border-color: #38a169;
+  background: rgba(56,161,105,0.1);
+  color: #68d391;
+}
+body.dark .pc-tile.unavailable {
+  border-color: #e53e3e;
+  background: rgba(229,62,62,0.08);
+  color: #fc8181;
+}
+body.dark .pc-tile.selected {
+  border-color: #5b9cf0;
+  background: #2a5298;
+  color: #fff;
+}
+
+/* Availability grid */
+body.dark .avail-pc {
+  background: rgba(56,161,105,0.1);
+  border-color: rgba(56,161,105,0.25);
+  color: #68d391;
+}
+body.dark .avail-pc.reserved {
+  background: rgba(229,62,62,0.1);
+  border-color: rgba(229,62,62,0.25);
+  color: #fc8181;
+}
+body.dark .avail-pc.pending {
+  background: rgba(214,158,46,0.1);
+  border-color: rgba(214,158,46,0.25);
+  color: #fbd38d;
+}
+
+/* ── Leaderboard page ── */
+body.dark .lb-table th {
+  background: #1e2335;
+  color: #8b95a5;
+  border-bottom-color: #2e3447;
+}
+body.dark .lb-table td {
+  color: #c5c9d2;
+  border-bottom-color: #252e42;
+}
+body.dark .lb-table tbody tr:hover { background: #2a3045; }
+
+/* ── Analytics / Reports ── */
+body.dark .bar-track { background: #2e3447; }
+body.dark .bar-fill  { background: linear-gradient(90deg, #3a5298, #5b82d4); }
+body.dark .bar-fill.green  { background: linear-gradient(90deg, #276749, #38a169); }
+body.dark .bar-fill.orange { background: linear-gradient(90deg, #b7791f, #d69e2e); }
+body.dark .bar-label { color: #8b95a5; }
+body.dark .bar-count { color: #8b95a5; }
+
+/* ── Export buttons ── */
+body.dark .export-btn-pdf { background: rgba(229,62,62,0.15); color: #fc8181; }
+body.dark .export-btn-pdf:hover { background: #e53e3e; color: #fff; }
+body.dark .export-btn-csv { background: rgba(56,161,105,0.15); color: #68d391; }
+body.dark .export-btn-csv:hover { background: #38a169; color: #fff; }
+
+/* ── Flash messages ── */
+body.dark .flash-success { background: #162b20; border-color: #276749; color: #9ae6b4; }
+body.dark .flash-error   { background: #2b1616; border-color: #9b2c2c; color: #fc8181; }
+body.dark .flash-info    { background: #162033; border-color: #2b6cb0; color: #90cdf4; }
+body.dark .flash-warning { background: #2b2010; border-color: #b7791f; color: #fbd38d; }
+
+/* ── Sidebar fine-tuning in dark ── */
+body.dark .admin-sidebar {
+  background: linear-gradient(180deg, #161b27 0%, #1e2642 100%);
+  box-shadow: 3px 0 20px rgba(0,0,0,.4);
+}
+body.dark .sidebar-brand {
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+body.dark .sidebar-bottom {
+  border-top-color: rgba(255,255,255,0.08);
+}
+body.dark .sidebar-section-label {
+  color: rgba(255,255,255,0.28);
+}
+body.dark .sidebar-link {
+  color: rgba(255,255,255,0.7);
+}
+body.dark .sidebar-link:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+body.dark .sidebar-link.active {
+  background: rgba(91,156,240,0.18);
+  color: #fff;
+}
+body.dark .sidebar-link.active::before {
+  background: #5b9cf0;
+}
+
+/* ── Reservations ── */
+body.dark .reservation-card,
+body.dark [class*="reservation-item"] {
+  background: #252a36;
+  border-color: #2e3447;
+}
+body.dark [class*="res-header"],
+body.dark [class*="reservation-header"] {
+  color: #ebedf0;
+}
+body.dark [class*="res-meta"],
+body.dark [class*="reservation-meta"] {
+  color: #8b95a5;
+}
+
+/* ── Feedback page ── */
+body.dark .star-rating { color: #d69e2e; }
+body.dark [class*="feedback-item"],
+body.dark [class*="feedback-row"] {
+  border-bottom-color: #2e3447;
+}
+body.dark [class*="feedback-text"] { color: #c5c9d2; }
+body.dark [class*="feedback-meta"] { color: #8b95a5; }
+
+/* ── HR dividers ── */
+body.dark hr {
+  border-color: #2e3447;
+}
+
+/* ── Scrollbars (webkit) ── */
+body.dark ::-webkit-scrollbar { width: 6px; height: 6px; }
+body.dark ::-webkit-scrollbar-track { background: #1c2030; }
+body.dark ::-webkit-scrollbar-thumb { background: #3a4258; border-radius: 3px; }
+body.dark ::-webkit-scrollbar-thumb:hover { background: #5b9cf0; }

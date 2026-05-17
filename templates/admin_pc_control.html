@@ -81,6 +81,85 @@
     .flash button { background:none; border:none; cursor:pointer; opacity:.5; }
     .flash-success { background:#c6f6d5; border-left:4px solid #38a169; color:#22543d; }
     .flash-error   { background:#fed7d7; border-left:4px solid #e53e3e; color:#742a2a; }
+
+    body.dark .page-title { color: #ebedf0; }
+ 
+/* Live badge */
+body.dark .live-badge {
+  background: rgba(56,161,105,0.12);
+  border-color: rgba(56,161,105,0.25);
+  color: #68d391;
+}
+ 
+/* Summary strip boxes */
+body.dark .strip-box {
+  background: #252a36;
+  border-color: #2e3447;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+body.dark .strip-lbl { color: #8b95a5; }
+ 
+/* Section label */
+body.dark .section-label { color: #5a6480; }
+ 
+/* PC cards */
+body.dark .pc-card {
+  background: #252a36;
+  border-color: #2e3447;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+body.dark .pc-card.active  { border-color: #38a169; box-shadow: 0 2px 10px rgba(56,161,105,.12); }
+body.dark .pc-card.vacant  { border-color: #2e3447; }
+ 
+body.dark .pc-card-label   { color: #8b95a5; }
+body.dark .student-name    { color: #ebedf0; }
+body.dark .student-meta    { color: #8b95a5; }
+body.dark .vacant-text     { color: #5a6480; }
+ 
+body.dark .pc-card-bottom  { background: #1e2335; border-top-color: #2e3447; }
+body.dark .info-row-sm .lbl { color: #5a6480; }
+body.dark .info-row-sm .val { color: #c5c9d2; }
+body.dark .elapsed-bar-bg  { background: #2e3447; }
+ 
+body.dark .logout-btn {
+  background: transparent;
+  color: #fc8181;
+  border-color: rgba(252,129,129,0.25);
+}
+body.dark .logout-btn:hover { background: rgba(252,129,129,0.08); }
+ 
+/* Empty state box */
+body.dark .pc-cards > div[style*="dashed"] {
+  background: #252a36 !important;
+  border-color: #2e3447 !important;
+  color: #5a6480 !important;
+}
+ 
+/* Log card & table */
+body.dark .card { background: #252a36; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+body.dark .card-header { background: linear-gradient(90deg,#1e2a50,#2a4298); }
+body.dark .log-table th {
+  background: #1e2335;
+  color: #8b95a5;
+  border-bottom-color: #2e3447;
+}
+body.dark .log-table td {
+  color: #c5c9d2;
+  border-bottom-color: #252e42;
+}
+body.dark .log-table tr:hover td { background: #2a3045; }
+body.dark .log-table tr:last-child td { border-bottom: none; }
+ 
+body.dark .badge-active {
+  background: rgba(56,161,105,0.15);
+  color: #68d391;
+}
+body.dark .badge-active::before { background: #38a169; }
+body.dark .empty-msg { color: #5a6480; }
+ 
+body.dark .flash-success { background: #162b20; border-left-color: #276749; color: #9ae6b4; }
+body.dark .flash-error   { background: #2b1616; border-left-color: #9b2c2c; color: #fc8181; }
+
   </style>
 </head>
 <body>

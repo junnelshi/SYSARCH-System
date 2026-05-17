@@ -129,11 +129,20 @@
     .sidebar-dark-icon { font-size: 0.9rem; flex-shrink: 0; width: 15px; text-align: center; }
 
     /* Logout */
+
+    .sidebar-bottom {
+      padding: 12px 10px 16px;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: auto;
+    }
+
     .sidebar-logout {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      padding: 8px 10px;
+      padding: 10px 10px;
       border-radius: 8px;
       color: #fff;
       background: #e8a020;
@@ -141,6 +150,7 @@
       font-weight: 700;
       text-decoration: none;
       transition: background 0.14s;
+      width: 100%;
     }
     .sidebar-logout:hover { background: #c98a18; }
     .sidebar-logout svg { width: 14px; height: 14px; flex-shrink: 0; }
@@ -541,6 +551,103 @@
     body.dark .notif-badge { border-color: #23272f; }
     body.dark .sidebar-dark-btn { color: rgba(255,255,255,0.9); }
 
+    /* Software availability */
+.sw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  padding: 4px 0;
+}
+ 
+.sw-card {
+  background: #f7fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all .15s;
+}
+.sw-card:hover {
+  border-color: #2a5298;
+  background: #eff6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(42,82,152,.1);
+}
+ 
+.sw-card-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+ 
+.sw-card-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1a202c;
+  line-height: 1.3;
+}
+ 
+.sw-card-desc {
+  font-size: 0.74rem;
+  color: #718096;
+  line-height: 1.5;
+  flex: 1;
+}
+ 
+.sw-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+ 
+.sw-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  background: #2a5298;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-decoration: none;
+  font-family: 'Inter', sans-serif;
+  transition: background .15s;
+}
+.sw-download-btn:hover { background: #1a3560; }
+ 
+.sw-date {
+  font-size: 0.68rem;
+  color: #a0aec0;
+}
+ 
+.sw-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #a0aec0;
+  font-size: 0.85rem;
+}
+.sw-empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+ 
+/* Dark mode for software */
+body.dark .sw-card {
+  background: #272c35;
+  border-color: #3a4049;
+}
+body.dark .sw-card:hover {
+  border-color: #5b9cf0;
+  background: #2a3350;
+  box-shadow: 0 4px 12px rgba(91,156,240,.1);
+}
+body.dark .sw-card-name { color: #ebedf0; }
+body.dark .sw-card-desc { color: #8b95a5; }
+body.dark .sw-date { color: #6b7280; }
+body.dark .sw-download-btn { background: #4068a8; }
+body.dark .sw-download-btn:hover { background: #344264; }
+body.dark .sw-empty { color: #6b7280; }
+
     /* responsive */
     @media (max-width: 768px) {
       .student-sidebar { display: none; }
@@ -609,20 +716,21 @@
       Reserve
     </a>
 
+    <a href="#" class="sidebar-link" id="nav-software" onclick="showTab('software');setActive(this);return false;">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+      </svg>
+      Software
+    </a>
+
     <a href="#" class="sidebar-link" id="nav-feedback" onclick="showTab('feedback');setActive(this);return false;">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
       Feedback
     </a>
 
-    <a href="#" class="sidebar-link" id="nav-ai-recs" onclick="showTab('ai-recs');setActive(this);return false;">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-      AI Tips
-    </a>
-
     <div class="sidebar-section-label" style="margin-top:6px;">Settings</div>
-    <button onclick="toggleDark()" class="sidebar-dark-btn" id="darkBtn">
+<button onclick="toggleDark()" class="sidebar-dark-btn" id="darkBtn">
       <span class="sidebar-dark-icon" id="darkIcon">🌙</span>
-      <span id="darkLabel">Dark Mode</span>
     </button>
   </nav>
 
@@ -1036,6 +1144,50 @@
         </div>
       </div>
 
+       <!-- ── Software Availability ── -->
+      <div id="tab-software" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+            Software Availability
+          </div>
+          <div class="card-body">
+            {% if software_list %}
+              <div class="sw-grid">
+                {% for sw in software_list %}
+                <div class="sw-card">
+                  <div class="sw-card-icon">💾</div>
+                  <div class="sw-card-name">{{ sw.name }}</div>
+                  {% if sw.description %}
+                    <div class="sw-card-desc">{{ sw.description }}</div>
+                  {% endif %}
+                  <div class="sw-card-footer">
+                    {% if sw.filename %}
+                      <a href="{{ url_for('static', filename='uploads/software/' + sw.filename) }}"
+                         class="sw-download-btn" download>
+                        ⬇ Download
+                      </a>
+                    {% else %}
+                      <span style="font-size:0.74rem;color:#a0aec0;">No file</span>
+                    {% endif %}
+                    <span class="sw-date">{{ sw.created_at[:10] if sw.created_at else '' }}</span>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="sw-empty">
+                <div class="sw-empty-icon">💿</div>
+                <div>No software available yet.</div>
+                <div style="font-size:0.76rem;margin-top:4px;color:#cbd5e0;">Check back later or ask your instructor.</div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
       <!-- ── Feedback ── -->
       <div id="tab-feedback" class="tab-pane">
         <div class="card">
@@ -1055,36 +1207,6 @@
         </div>
       </div>
 
-      <!-- ── AI Tips ── -->
-      <div id="tab-ai-recs" class="tab-pane">
-        <div class="card">
-          <div class="card-header">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-            AI Recommendations
-          </div>
-          <div class="card-body">
-            <p style="font-size:0.8rem;color:#718096;margin-bottom:14px;">Personalized tips based on your sit-in history and usage patterns.</p>
-            {% if ai_recs %}
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                {% for rec in ai_recs %}
-                <div style="background:#f7fafc;border:1px solid #e2e8f0;border-radius:9px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;">
-                  <div style="font-size:1.3rem;flex-shrink:0;line-height:1;">{{ rec.icon }}</div>
-                  <div>
-                    <div style="font-size:0.84rem;font-weight:700;color:#1a202c;margin-bottom:3px;">{{ rec.title }}</div>
-                    <div style="font-size:0.79rem;color:#4a5568;line-height:1.6;">{{ rec.tip }}</div>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <p class="no-data">No recommendations yet. Start using the lab to get personalized tips!</p>
-            {% endif %}
-            <div style="margin-top:14px;padding:10px 13px;background:#eff6ff;border-radius:7px;border:1px solid #bfdbfe;font-size:0.73rem;color:#1d4ed8;">
-              💡 Recommendations update automatically based on your sit-in history, preferred labs, and session patterns.
-            </div>
-          </div>
-        </div>
-      </div>
 
     </main>
 
@@ -1128,13 +1250,11 @@ function toggleDark() {
   const isDark = document.body.classList.toggle('dark');
   localStorage.setItem('darkMode', isDark ? '1' : '0');
   document.getElementById('darkIcon').textContent = isDark ? '☀️' : '🌙';
-  document.getElementById('darkLabel').textContent = isDark ? 'Light Mode' : 'Dark Mode';
 }
 (function(){
   if (localStorage.getItem('darkMode') === '1') {
     document.body.classList.add('dark');
     document.getElementById('darkIcon').textContent = '☀️';
-    document.getElementById('darkLabel').textContent = 'Light Mode';
   }
 })();
 

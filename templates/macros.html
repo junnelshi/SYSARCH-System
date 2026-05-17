@@ -8,6 +8,8 @@
     display: flex;
     min-height: 100vh;
     background: #f0f4f8;
+    color: #1a202c;
+    font-family: 'Inter', sans-serif;
   }
 
   /* ── Sidebar ── */
@@ -85,16 +87,9 @@
     flex-shrink: 0;
     opacity: 0.75;
   }
-  .sidebar-link:hover {
-    background: rgba(255,255,255,0.12);
-    color: #fff;
-  }
+  .sidebar-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
   .sidebar-link:hover svg { opacity: 1; }
-  .sidebar-link.active {
-    background: rgba(255,255,255,0.18);
-    color: #fff;
-    font-weight: 700;
-  }
+  .sidebar-link.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 700; }
   .sidebar-link.active svg { opacity: 1; }
   .sidebar-link.active::before {
     content: '';
@@ -106,7 +101,7 @@
   }
   .sidebar-link { position: relative; }
 
-  /* Dark mode toggle as a sidebar link */
+  /* Dark mode toggle */
   .sidebar-dark-link {
     display: flex;
     align-items: center;
@@ -126,23 +121,21 @@
     font-family: 'Inter', sans-serif;
     position: relative;
   }
-  .sidebar-dark-link:hover {
-    background: rgba(255,255,255,0.12);
-    color: #fff;
-  }
+  .sidebar-dark-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
   .sidebar-dark-icon { font-size: 0.9rem; flex-shrink: 0; width: 15px; text-align: center; }
 
-  /* Bottom actions — logout only */
+  /* Bottom actions */
   .sidebar-bottom {
-    padding: 10px;
+    padding: 12px 10px 16px;
     border-top: 1px solid rgba(255,255,255,0.1);
     flex-shrink: 0;
   }
   .sidebar-logout {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 8px 10px;
+    padding: 10px 10px;
     border-radius: 8px;
     color: #fff;
     background: #e8a020;
@@ -150,6 +143,7 @@
     font-weight: 700;
     text-decoration: none;
     transition: background 0.14s;
+    width: 100%;
   }
   .sidebar-logout:hover { background: #c98a18; }
   .sidebar-logout svg { width: 14px; height: 14px; flex-shrink: 0; }
@@ -166,34 +160,104 @@
     box-sizing: border-box;
   }
 
-  /* Override old navbar styles to hidden */
   .admin-navbar { display: none !important; }
 
-  /* Dark mode sidebar */
-  body.dark .admin-sidebar {
-    background: linear-gradient(180deg, #1e222a 0%, #272d38 100%);
-    box-shadow: 3px 0 16px rgba(0,0,0,0.25);
-  }
-  body.dark .admin-main-content { background: #23272f; }
-  body.dark .sidebar-dark-link { color: rgba(255,255,255,0.9); }
-
-  /* Page wrap override */
   .admin-page {
     max-width: 100%;
     margin: 0;
     padding: 0;
   }
+
+  /* ══════════════════════════════════════════
+     ADMIN DARK MODE — comprehensive
+     ══════════════════════════════════════════ */
+  body.dark {
+    background: #23272f;
+    color: #d5d8de;
+  }
+  body.dark .admin-main-content { background: #23272f; }
+  body.dark .admin-sidebar {
+    background: linear-gradient(180deg, #1e222a 0%, #272d38 100%);
+    box-shadow: 3px 0 16px rgba(0,0,0,0.35);
+  }
+  body.dark .sidebar-dark-link { color: rgba(255,255,255,0.9); }
+
+  /* Cards & panels */
+  body.dark .card { background: #2b3039; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+  body.dark .card-header { background: linear-gradient(90deg, #344264, #4068a8); }
+  body.dark .card-body { background: #2b3039; }
+
+  /* Summary boxes */
+  body.dark .summary-box { background: #2b3039; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  body.dark .summary-num { color: #ebedf0; }
+  body.dark .summary-lbl { color: #8b95a5; }
+  body.dark .summary-icon.blue   { background: rgba(42,82,152,0.25); }
+  body.dark .summary-icon.green  { background: rgba(56,161,105,0.25); }
+  body.dark .summary-icon.orange { background: rgba(214,158,46,0.25); }
+
+  /* Announcements */
+  body.dark .ann-textarea { background: #1e222a; border-color: #3a4049; color: #d5d8de; }
+  body.dark .ann-textarea:focus { border-color: #5b9cf0; box-shadow: 0 0 0 3px rgba(91,156,240,.12); }
+  body.dark .ann-textarea::placeholder { color: #6b7280; }
+  body.dark .ann-list-title { color: #ebedf0; }
+  body.dark .ann-item { border-bottom-color: #32383f; }
+  body.dark .ann-dot { background: #5b9cf0; }
+  body.dark .ann-meta { color: #6da3e8; }
+  body.dark .ann-body { color: #c5c9d2; }
+  body.dark .ann-delete { background: rgba(229,62,62,.1); border-color: rgba(229,62,62,.25); color: #fc8181; }
+  body.dark .ann-delete:hover { background: #e53e3e; color: #fff; border-color: #e53e3e; }
+
+  /* Stat strip */
+  body.dark .stat-strip { border-bottom-color: #32383f; }
+  body.dark .stat-strip-item:first-child { border-right-color: #32383f; }
+  body.dark .strip-num { color: #6da3e8; }
+  body.dark .strip-num.green { color: #4ade80; }
+  body.dark .strip-lbl { color: #8b95a5; }
+
+  /* Bar charts */
+  body.dark .bar-track { background: #3a4049; }
+  body.dark .bar-name.blue { color: #6da3e8; }
+  body.dark .bar-name.gray { color: #a0a8b6; }
+  body.dark .bar-count { color: #8b95a5; }
+  body.dark .section-label { color: #6b7280; }
+  body.dark .view-link { color: #6da3e8; }
+  body.dark .view-link:hover { color: #93c5fd; }
+  body.dark .no-data { color: #6b7280; }
+  body.dark .no-lb { color: #6b7280; }
+
+  /* Leaderboard */
+  body.dark .lb-row { background: #1e222a; border-color: #3a4049; }
+  body.dark .lb-row:hover { background: #252d3d; border-color: #5b9cf0; }
+  body.dark .lb-name { color: #ebedf0; }
+  body.dark .lb-course { color: #8b95a5; }
+  body.dark .view-all-btn { background: #1e222a; border-color: #3a4049; color: #6da3e8; }
+  body.dark .view-all-btn:hover { background: #252d3d; border-color: #5b9cf0; }
+
+  /* Flash messages */
+  body.dark .flash-success { background: #1a2e23; border-color: #2f6b48; color: #6ee7a0; }
+  body.dark .flash-error   { background: #2e1a1a; border-color: #6b2f2f; color: #fc8181; }
+  body.dark .flash-info    { background: #1a2233; border-color: #2f4a6b; color: #90cdf4; }
+  body.dark .flash-warning { background: #2e2614; border-color: #6b5a1a; color: #fbd38d; }
+
+  /* Modals */
+  body.dark .modal { background: #2b3039; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+  body.dark .modal-header { background: linear-gradient(90deg, #1e222a, #2a3350); border-bottom-color: #32383f; color: #ebedf0; }
+  body.dark .modal-input { background: #1e222a; border-color: #3a4049; color: #d5d8de; }
+  body.dark .modal-input:focus { border-color: #5b9cf0; }
+  body.dark .form-group label { color: #a0a8b6; }
+  body.dark .result-row { background: #1e222a; border-color: #3a4049; }
+  body.dark .result-row:hover { background: #252d3d; }
+  body.dark .result-name { color: #ebedf0; }
+  body.dark .result-meta { color: #8b95a5; }
 </style>
 
 <!-- ── Sidebar ── -->
 <aside class="admin-sidebar">
-  <!-- Brand -->
   <div class="sidebar-brand">
     <div class="sidebar-brand-title">CCS Admin</div>
     <div class="sidebar-brand-sub">College of Computer Studies</div>
   </div>
 
-  <!-- Nav -->
   <nav class="sidebar-nav">
     <div class="sidebar-section-label">Main</div>
 
@@ -261,16 +325,13 @@
       PC Control
     </a>
 
-    <!-- Dark Mode toggle — lives in the nav like any other link -->
     <div class="sidebar-section-label" style="margin-top:6px;">Settings</div>
     <button onclick="toggleAdminDark()" class="sidebar-dark-link admin-dark-btn">
       <span class="sidebar-dark-icon">🌙</span>
-      <span class="dark-btn-label">Dark Mode</span>
     </button>
 
   </nav>
 
-  <!-- Bottom — logout only -->
   <div class="sidebar-bottom">
     <a href="{{ url_for('logout') }}" class="sidebar-logout">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -279,7 +340,6 @@
   </div>
 </aside>
 
-<!-- Wrapper so page content sits beside sidebar -->
 <div class="admin-main-content">
 
 <!-- ── Search Modal ── -->
@@ -408,13 +468,11 @@ function toggleAdminDark() {
   const isDark = document.body.classList.toggle('dark');
   localStorage.setItem('adminDark', isDark ? '1' : '0');
   document.querySelectorAll('.admin-dark-btn .sidebar-dark-icon').forEach(b => b.textContent = isDark ? '☀️' : '🌙');
-  document.querySelectorAll('.dark-btn-label').forEach(b => b.textContent = isDark ? 'Light Mode' : 'Dark Mode');
 }
 (function(){
   if (localStorage.getItem('adminDark') === '1') {
     document.body.classList.add('dark');
     document.querySelectorAll('.admin-dark-btn .sidebar-dark-icon').forEach(b => b.textContent = '☀️');
-    document.querySelectorAll('.dark-btn-label').forEach(b => b.textContent = 'Light Mode');
   }
 })();
 
